@@ -110,7 +110,7 @@ export function calculate(i: Inputs): Result {
     if (payback === null && prev < 0 && cumulative >= 0) payback = y - 1 + -prev / cashflow;
     rows.push({ year: y, generation, selfUsed, exported, savings, om, cashflow, cumulative });
   }
-  const y1 = rows[0];
+  const y1 = rows[0]!;
   return {
     upfront,
     years: rows,

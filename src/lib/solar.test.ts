@@ -15,7 +15,7 @@ describe("solar engine", () => {
   });
   it("self-use never exceeds household consumption", () => {
     const r = calculate({ ...base, selfUsePct: 90, annualUsageKwh: 2000 });
-    expect(r.years[0].selfUsed).toBe(2000);
+    expect(r.years[0]!.selfUsed).toBe(2000);
   });
   it("returns null payback when savings never cover cost", () => {
     expect(calculate({ ...base, importPrice: 0.01, exportPrice: 0 }).payback).toBeNull();

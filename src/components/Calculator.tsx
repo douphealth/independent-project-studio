@@ -156,7 +156,7 @@ export function Calculator({ initial }: { initial?: { place: Place; profile: Sol
           </div>
           {profile && (
             <p className="mt-4 text-xs text-muted-foreground">
-              Solar yield: PVGIS {profile.radiationDb} ({profile.period}), {profile.angle}° tilt, south-facing, 14% system losses. 0.5%/yr panel degradation, €15/kWp/yr maintenance.
+              Solar yield: {profile.radiationDb} ({profile.period}), {profile.angle}° tilt, south-facing, 14% system losses. 0.5%/yr panel degradation, €15/kWp/yr maintenance.
             </p>
           )}
         </div>
