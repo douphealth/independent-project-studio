@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Stay fully independent: no Lovable Cloud, Lovable AI gateway, or Lovable-hosted services — the owner requires a self-contained app (external data only from free public APIs like PVGIS/Open-Meteo, called via server functions).
+- Never hard-code solar yield or market prices per city; fetch PVGIS live so directory pages stay verifiable.
+- Financial maths lives in `src/lib/solar.ts` as pure functions with tests in `solar.test.ts`; UI must not duplicate formulas.
