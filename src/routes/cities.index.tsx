@@ -9,9 +9,9 @@ const D = "Search and compare live PVGIS solar production for 24 European cities
 
 export const Route = createFileRoute("/cities/")({
   validateSearch: (search): DirectoryFilters => ({
-    q: typeof search.q === "string" ? search.q.slice(0, 80) : undefined,
-    country: typeof search.country === "string" ? search.country : undefined,
-    sort: typeof search.sort === "string" ? search.sort : undefined,
+    q: typeof search["q"] === "string" ? search["q"].slice(0, 80) : undefined,
+    country: typeof search["country"] === "string" ? search["country"] : undefined,
+    sort: typeof search["sort"] === "string" ? search["sort"] : undefined,
   }),
   loaderDeps: () => ({}),
   loader: async () => {
@@ -41,6 +41,6 @@ function Cities() {
     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Independent solar intelligence</p>
     <h1 className="mt-3 max-w-3xl text-4xl font-semibold sm:text-6xl">Compare the sun before you compare quotes.</h1>
     <p className="mt-4 max-w-2xl text-lg text-muted-foreground">Live PVGIS production estimates, consistent assumptions and a calculator for your real bill. No installer rankings, sponsored positions or invented market prices.</p>
-    <DirectoryExplorer entries={entries} filters={filters} onFilters={(next) => void navigate({ search: next, replace: true })} />
+    <DirectoryExplorer entries={entries} filters={filters} onFilters={(next) => void navigate({ to: "/cities", search: next, replace: true })} />
   </main><SiteFooter /></div>;
 }

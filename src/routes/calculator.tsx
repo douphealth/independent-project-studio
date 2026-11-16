@@ -10,7 +10,7 @@ const T = "Solar payback calculator — savings, NPV & IRR | SolarPayback";
 const D = "Calculate solar payback using live PVGIS production, your installer quote and electricity bill. Save, compare, share and download a real PDF report.";
 
 export const Route = createFileRoute("/calculator")({
-  validateSearch: (search): { scenario?: string } => ({ scenario: typeof search.scenario === "string" ? search.scenario : undefined }),
+  validateSearch: (search): { scenario?: string | undefined } => ({ scenario: typeof search["scenario"] === "string" ? search["scenario"] : undefined }),
   loaderDeps: ({ search }) => ({ scenario: search.scenario }),
   loader: async ({ deps }) => {
     const scenario = decodeScenario(deps.scenario);

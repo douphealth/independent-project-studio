@@ -20,7 +20,7 @@ export function CityComparison({ entries, selected }: { entries: Entry[]; select
     const next = [...selected];
     next[index] = slug;
     const clean = [...new Set(next.filter(Boolean))].slice(0, 3);
-    void navigate({ search: (prev: { cities?: string[] }) => ({ ...prev, cities: clean }), replace: true });
+    void navigate({ to: "/compare", search: { cities: clean }, replace: true });
   }
   async function copy() {
     try { await navigator.clipboard.writeText(window.location.href); setCopied(true); } catch { setCopied(false); }

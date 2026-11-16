@@ -1,4 +1,4 @@
-import { calculate, money, num, type Result } from "./solar";
+import { calculate, money, num } from "./solar";
 import type { SolarProfile } from "./pvgis.functions";
 import type { Scenario } from "./scenarios";
 

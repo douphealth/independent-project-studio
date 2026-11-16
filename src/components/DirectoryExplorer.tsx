@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpDown, Check, MapPin, Search } from "lucide-react";
+import { ArrowRight, Check, MapPin, Search } from "lucide-react";
 import { CITIES, COUNTRY_GUIDES } from "@/lib/cities";
 import type { SolarProfile } from "@/lib/pvgis.functions";
 import { calculate, DEFAULTS, money, num } from "@/lib/solar";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export type DirectoryEntry = { city: (typeof CITIES)[number]; profile: SolarProfile | null };
-export type DirectoryFilters = { q?: string; country?: string; sort?: string };
+export type DirectoryFilters = { q?: string | undefined; country?: string | undefined; sort?: string | undefined };
 
 export function DirectoryExplorer({ entries, filters, onFilters }: { entries: DirectoryEntry[]; filters: DirectoryFilters; onFilters: (next: DirectoryFilters) => void }) {
   const [selected, setSelected] = useState<string[]>([]);

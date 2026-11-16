@@ -8,7 +8,7 @@ const T = "Compare solar production in European cities | SolarPayback";
 const D = "Compare annual and monthly PVGIS solar yield for up to three cities, with consistent reference payback and links to personalized calculators.";
 
 export const Route = createFileRoute("/compare")({
-  validateSearch: (search): { cities?: string[] } => ({ cities: typeof search.cities === "string" ? [...new Set(search.cities.split(",").filter((s) => CITIES.some((c) => c.slug === s)))].slice(0, 3) : Array.isArray(search.cities) ? search.cities.filter((s): s is string => typeof s === "string" && CITIES.some((c) => c.slug === s)).slice(0, 3) : undefined }),
+  validateSearch: (search): { cities?: string[] | undefined } => ({ cities: typeof search["cities"] === "string" ? [...new Set(search["cities"].split(",").filter((s) => CITIES.some((c) => c.slug === s)))].slice(0, 3) : Array.isArray(search["cities"]) ? search["cities"].filter((s): s is string => typeof s === "string" && CITIES.some((c) => c.slug === s)).slice(0, 3) : undefined }),
   loaderDeps: () => ({}),
   loader: async () => {
     const profiles = await getDirectoryProfiles({ data: { places: CITIES } });

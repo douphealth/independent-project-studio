@@ -37,7 +37,7 @@ const ADVANCED_FIELDS: Field[] = [
   { key: "lifetime", label: "Analysis lifetime", min: 10, max: 40, step: 5, fmt: (n) => `${n} years` },
 ];
 
-export function Calculator({ initial }: { initial?: { place: ScenarioPlace; profile: SolarProfile; scenario?: Scenario } }) {
+export function Calculator({ initial }: { initial?: { place: ScenarioPlace; profile: SolarProfile; scenario?: Scenario } | undefined }) {
   const geo = useServerFn(geocode);
   const pv = useServerFn(getSolarProfile);
   const initialScenario = initial?.scenario;
@@ -233,7 +233,7 @@ function CalculatorField({ field: f, value, currency, onChange, slider = false }
   return <div>
     <div className="flex items-center justify-between gap-3 text-sm"><label htmlFor={id} className="font-medium">{f.label}</label><span className="font-semibold text-primary tabular">{f.fmt(value, currency)}</span></div>
     <div className={`mt-2 grid items-center gap-3 ${slider ? "grid-cols-[1fr_92px]" : ""}`}>
-      {slider && <Slider min={f.min} max={f.max} step={f.step} value={[Math.min(f.max, Math.max(f.min, value))]} onValueChange={([n]) => onChange(f.key, n)} aria-label={f.label} />}
+      {slider && <Slider min={f.min} max={f.max} step={f.step} value={[Math.min(f.max, Math.max(f.min, value))]} onValueChange={([n]) => n !== undefined && onChange(f.key, n)} aria-label={f.label} />}
       <Input id={id} type="number" inputMode="decimal" min={f.min} max={f.max} step={f.step} value={value} onChange={(e) => onChange(f.key, e.target.valueAsNumber)} className={slider ? "h-9 px-2 text-right text-xs" : "h-10"} />
     </div>
     {f.hint && <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{f.hint}</p>}
