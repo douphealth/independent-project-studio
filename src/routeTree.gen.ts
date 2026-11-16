@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculatorRouteImport } from './routes/calculator'
+import { Route as CompareRouteImport } from './routes/compare'
 import { Route as MethodologyRouteImport } from './routes/methodology'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as CitiesIndexRouteImport } from './routes/cities.index'
 import { Route as CitiesSlugRouteImport } from './routes/cities.$slug'
+import { Route as CountriesSlugRouteImport } from './routes/countries.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -24,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 const CalculatorRoute = CalculatorRouteImport.update({
   id: '/calculator',
   path: '/calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MethodologyRoute = MethodologyRouteImport.update({
@@ -46,30 +53,41 @@ const CitiesSlugRoute = CitiesSlugRouteImport.update({
   path: '/cities/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CountriesSlugRoute = CountriesSlugRouteImport.update({
+  id: '/countries/$slug',
+  path: '/countries/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/cities/$slug': typeof CitiesSlugRoute
+  '/countries/$slug': typeof CountriesSlugRoute
   '/cities/': typeof CitiesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/cities/$slug': typeof CitiesSlugRoute
+  '/countries/$slug': typeof CountriesSlugRoute
   '/cities': typeof CitiesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/cities/$slug': typeof CitiesSlugRoute
+  '/countries/$slug': typeof CountriesSlugRoute
   '/cities/': typeof CitiesIndexRoute
 }
 export interface FileRouteTypes {
@@ -77,34 +95,42 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/calculator'
+    | '/compare'
     | '/methodology'
     | '/sitemap.xml'
     | '/cities/$slug'
+    | '/countries/$slug'
     | '/cities/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/calculator'
+    | '/compare'
     | '/methodology'
     | '/sitemap.xml'
     | '/cities/$slug'
+    | '/countries/$slug'
     | '/cities'
   id:
     | '__root__'
     | '/'
     | '/calculator'
+    | '/compare'
     | '/methodology'
     | '/sitemap.xml'
     | '/cities/$slug'
+    | '/countries/$slug'
     | '/cities/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculatorRoute: typeof CalculatorRoute
+  CompareRoute: typeof CompareRoute
   MethodologyRoute: typeof MethodologyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CitiesSlugRoute: typeof CitiesSlugRoute
+  CountriesSlugRoute: typeof CountriesSlugRoute
   CitiesIndexRoute: typeof CitiesIndexRoute
 }
 
@@ -122,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/calculator'
       fullPath: '/calculator'
       preLoaderRoute: typeof CalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/methodology': {
@@ -152,15 +185,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CitiesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/countries/$slug': {
+      id: '/countries/$slug'
+      path: '/countries/$slug'
+      fullPath: '/countries/$slug'
+      preLoaderRoute: typeof CountriesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculatorRoute: CalculatorRoute,
+  CompareRoute: CompareRoute,
   MethodologyRoute: MethodologyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CitiesSlugRoute: CitiesSlugRoute,
+  CountriesSlugRoute: CountriesSlugRoute,
   CitiesIndexRoute: CitiesIndexRoute,
 }
 export const routeTree = rootRouteImport
