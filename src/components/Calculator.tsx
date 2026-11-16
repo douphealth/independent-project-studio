@@ -175,8 +175,8 @@ export function Calculator({ initial }: { initial?: { place: ScenarioPlace; prof
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Aspect: 0° south, −90° east, 90° west. Apply to request a new PVGIS profile.</p>
               <div className="mt-5 grid grid-cols-3 gap-3">
                 <RoofInput label="Tilt °" value={roof.angle} min={0} max={90} onChange={(n) => updateRoof({ angle: n })} />
-                <RoofInput label="Aspect °" value={roof.aspect} min={-180} max={180} onChange={(n) => updateRoof({ aspect: n }))} />
-                <RoofInput label="Losses %" value={roof.loss} min={0} max={40} onChange={(n) => updateRoof({ loss: n }))} />
+                <RoofInput label="Aspect °" value={roof.aspect} min={-180} max={180} onChange={(n) => updateRoof({ aspect: n })} />
+                <RoofInput label="Losses %" value={roof.loss} min={0} max={40} onChange={(n) => updateRoof({ loss: n })} />
               </div>
               <Button type="button" variant="outline" className="mt-4 w-full" disabled={!place || busy} onClick={() => place && choose(place, roof)}>{busy ? <Loader2 className="animate-spin" /> : <ArrowRight />} Update solar profile</Button>
               <h3 className="mt-8 font-semibold">Long-term assumptions</h3>
