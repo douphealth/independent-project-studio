@@ -13,3 +13,5 @@
 
 - Production deployment to the canonical public domain: requires the owner's deployment credentials/process; the preview has been updated, not the public deployment.
 - Payments, hosted analytics, accounts, cloud storage, and bill uploads: intentionally excluded until the owner approves independent providers and a revised privacy/security design.
+- [x] Quote Audit Dossier (audit engine, on-page panel, 7-page PDF)
+- [ ] Paid unlock — blocked: owner must choose an independent payment provider account

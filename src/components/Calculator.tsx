@@ -12,6 +12,7 @@ import { currencyForCountry, type Currency } from "@/lib/cities";
 import { createScenario, DEFAULT_ROOF, encodeScenario, type RoofOptions, type Scenario, type ScenarioPlace, type ScenarioValues } from "@/lib/scenarios";
 import { saveScenario } from "@/lib/storage";
 import { exportScenarioCsv, exportScenarioPdf } from "@/lib/export";
+import { QuoteAudit } from "@/components/QuoteAudit";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 type FieldKey = keyof ScenarioValues;
@@ -228,6 +229,7 @@ export function Calculator({ initial }: { initial?: { place: ScenarioPlace; prof
           </section>
 
           {res && <section className="rounded-2xl border border-border bg-secondary p-5"><h2 className="font-semibold">Quote sensitivity</h2><p className="mt-1 text-sm text-muted-foreground">If every other assumption stayed the same:</p><div className="mt-3 grid gap-3 sm:grid-cols-2">{sensitivity.map((s) => <p key={s.change} className="rounded-xl bg-card p-3 text-sm">Installed cost {s.change > 0 ? "+" : ""}{s.change}% → <strong>{s.payback == null ? `>${v.lifetime} years` : `${num(s.payback, 1)} years`}</strong></p>)}</div></section>}
+          {res && profile && <QuoteAudit base={{ ...v, annualKwhPerKwp: profile.annualKwhPerKwp }} profile={profile} scenario={scenario} currency={currency} />}
         </div>
       </div>
     </div>
