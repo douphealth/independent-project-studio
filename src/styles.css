@@ -9,6 +9,14 @@
 @source "../src";
 @import "tw-animate-css";
 
+@font-face { font-family: 'Fraunces'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/fraunces-400-latin.ttf') format('truetype'); }
+@font-face { font-family: 'Fraunces'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/fraunces-600-latin.ttf') format('truetype'); }
+@font-face { font-family: 'Fraunces'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/fraunces-700-latin.ttf') format('truetype'); }
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/manrope-400-latin.ttf') format('truetype'); }
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/manrope-500-latin.ttf') format('truetype'); }
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/manrope-600-latin.ttf') format('truetype'); }
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/manrope-700-latin.ttf') format('truetype'); }
+
 @custom-variant dark (&:is(.dark *));
 
 /*
@@ -86,7 +94,7 @@
   --card-foreground: oklch(0.2 0.02 50);
   --popover: oklch(0.99 0.008 85);
   --popover-foreground: oklch(0.2 0.02 50);
-  --primary: oklch(0.66 0.175 50);
+  --primary: oklch(0.53 0.155 50);
   --primary-foreground: oklch(0.99 0.01 85);
   --primary-glow: oklch(0.8 0.16 75);
   --secondary: oklch(0.93 0.025 80);
@@ -99,16 +107,16 @@
   --destructive-foreground: oklch(0.98 0 0);
   --border: oklch(0.88 0.02 75);
   --input: oklch(0.87 0.022 75);
-  --ring: oklch(0.66 0.175 50);
+  --ring: oklch(0.53 0.155 50);
   --night: oklch(0.2 0.03 255);
   --night-foreground: oklch(0.95 0.015 85);
   --night-muted: oklch(0.7 0.03 250);
-  --chart-1: oklch(0.66 0.175 50);
+  --chart-1: oklch(0.53 0.155 50);
   --chart-2: oklch(0.8 0.16 75);
   --chart-3: oklch(0.45 0.08 240);
   --chart-4: oklch(0.6 0.12 155);
   --chart-5: oklch(0.55 0.2 27);
-  --gradient-sun: linear-gradient(135deg, var(--primary), var(--primary-glow));
+  --gradient-sun: linear-gradient(135deg, oklch(0.5 0.15 50), oklch(0.56 0.16 55));
   --gradient-dusk: linear-gradient(180deg, oklch(0.2 0.03 255 / 0) 0%, oklch(0.2 0.03 255 / 0.55) 55%, oklch(0.16 0.03 255 / 0.92) 100%);
   --shadow-soft: 0 1px 2px oklch(0.3 0.03 50 / 0.06), 0 12px 40px -16px oklch(0.3 0.05 50 / 0.22);
   --shadow-glow: 0 18px 50px -18px color-mix(in oklab, var(--primary) 60%, transparent);
@@ -141,7 +149,7 @@
 @utility shadow-soft { box-shadow: var(--shadow-soft); }
 @utility shadow-glow { box-shadow: var(--shadow-glow); }
 @utility text-sun {
-  background-image: var(--gradient-sun);
+  background-image: linear-gradient(135deg, var(--primary-glow), oklch(0.86 0.14 80));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -150,3 +158,7 @@
 
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @utility animate-rise { animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+}
