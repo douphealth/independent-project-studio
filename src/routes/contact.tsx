@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ExternalLink, FileWarning, Github, Scale } from "lucide-react";
+import { ExternalLink, Github } from "lucide-react";
 import { ContentPage } from "@/components/ContentPage";
 import { SITE_URL } from "@/lib/cities";
 

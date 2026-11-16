@@ -10,11 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as CompareRouteImport } from './routes/compare'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as MethodologyRouteImport } from './routes/methodology'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ScenariosRouteImport } from './routes/scenarios'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as CitiesIndexRouteImport } from './routes/cities.index'
 import { Route as CitiesSlugRouteImport } from './routes/cities.$slug'
 import { Route as CountriesSlugRouteImport } from './routes/countries.$slug'
@@ -22,6 +26,11 @@ import { Route as CountriesSlugRouteImport } from './routes/countries.$slug'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalculatorRoute = CalculatorRouteImport.update({
@@ -34,9 +43,19 @@ const CompareRoute = CompareRouteImport.update({
   path: '/compare',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MethodologyRoute = MethodologyRouteImport.update({
   id: '/methodology',
   path: '/methodology',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScenariosRoute = ScenariosRouteImport.update({
@@ -47,6 +66,11 @@ const ScenariosRoute = ScenariosRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CitiesIndexRoute = CitiesIndexRouteImport.update({
@@ -67,22 +91,30 @@ const CountriesSlugRoute = CountriesSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
+  '/contact': typeof ContactRoute
   '/methodology': typeof MethodologyRoute
+  '/privacy': typeof PrivacyRoute
   '/scenarios': typeof ScenariosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/cities/$slug': typeof CitiesSlugRoute
   '/countries/$slug': typeof CountriesSlugRoute
   '/cities/': typeof CitiesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
+  '/contact': typeof ContactRoute
   '/methodology': typeof MethodologyRoute
+  '/privacy': typeof PrivacyRoute
   '/scenarios': typeof ScenariosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/cities/$slug': typeof CitiesSlugRoute
   '/countries/$slug': typeof CountriesSlugRoute
   '/cities': typeof CitiesIndexRoute
@@ -90,11 +122,15 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
+  '/contact': typeof ContactRoute
   '/methodology': typeof MethodologyRoute
+  '/privacy': typeof PrivacyRoute
   '/scenarios': typeof ScenariosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/cities/$slug': typeof CitiesSlugRoute
   '/countries/$slug': typeof CountriesSlugRoute
   '/cities/': typeof CitiesIndexRoute
@@ -103,33 +139,45 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/calculator'
     | '/compare'
+    | '/contact'
     | '/methodology'
+    | '/privacy'
     | '/scenarios'
     | '/sitemap.xml'
+    | '/terms'
     | '/cities/$slug'
     | '/countries/$slug'
     | '/cities/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/calculator'
     | '/compare'
+    | '/contact'
     | '/methodology'
+    | '/privacy'
     | '/scenarios'
     | '/sitemap.xml'
+    | '/terms'
     | '/cities/$slug'
     | '/countries/$slug'
     | '/cities'
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/calculator'
     | '/compare'
+    | '/contact'
     | '/methodology'
+    | '/privacy'
     | '/scenarios'
     | '/sitemap.xml'
+    | '/terms'
     | '/cities/$slug'
     | '/countries/$slug'
     | '/cities/'
@@ -137,11 +185,15 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   CalculatorRoute: typeof CalculatorRoute
   CompareRoute: typeof CompareRoute
+  ContactRoute: typeof ContactRoute
   MethodologyRoute: typeof MethodologyRoute
+  PrivacyRoute: typeof PrivacyRoute
   ScenariosRoute: typeof ScenariosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsRoute: typeof TermsRoute
   CitiesSlugRoute: typeof CitiesSlugRoute
   CountriesSlugRoute: typeof CountriesSlugRoute
   CitiesIndexRoute: typeof CitiesIndexRoute
@@ -154,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calculator': {
@@ -170,11 +229,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompareRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/methodology': {
       id: '/methodology'
       path: '/methodology'
       fullPath: '/methodology'
       preLoaderRoute: typeof MethodologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/scenarios': {
@@ -189,6 +262,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cities/': {
@@ -217,11 +297,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   CalculatorRoute: CalculatorRoute,
   CompareRoute: CompareRoute,
+  ContactRoute: ContactRoute,
   MethodologyRoute: MethodologyRoute,
+  PrivacyRoute: PrivacyRoute,
   ScenariosRoute: ScenariosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsRoute: TermsRoute,
   CitiesSlugRoute: CitiesSlugRoute,
   CountriesSlugRoute: CountriesSlugRoute,
   CitiesIndexRoute: CitiesIndexRoute,
