@@ -70,7 +70,6 @@ export async function exportAuditPdf(scenario: Scenario, profile: SolarProfile, 
     doc.text(title[0]!, PDF_MARGIN + 51, report.y);
     report.y += 6.5;
   });
-  report.callout("Read the score correctly", "The A-E grade is a deterministic rule-based screening summary of the entered claims and assumptions. It is not a certification, probability of installer performance, site survey or guarantee. An unchecked contract item is treated as unconfirmed and must be verified against the actual documents.", "blue");
 
   // Findings with evidence and next action.
   report.section("01  /  Exceptions", "Detailed findings & priorities", "Each finding is derived from the entered quote, the PVGIS baseline or the shared financial model. Resolve red flags first, then document every clarification in writing.");
@@ -124,20 +123,6 @@ export async function exportAuditPdf(scenario: Scenario, profile: SolarProfile, 
     [42, 46, 45, 45],
     7.5,
   );
-  if (r.claimModel) {
-    report.h2("Sensitivity to the installer's generation claim", "This counterfactual changes only annual yield. It is not an endorsement of the claim.");
-    report.table(
-      ["Metric", "PVGIS baseline", "Installer-yield counterfactual"],
-      [
-        ["Simple payback", model.payback == null ? "Beyond horizon" : `${num(model.payback, 1)} yrs`, r.claimModel.payback == null ? "Beyond horizon" : `${num(r.claimModel.payback, 1)} yrs`],
-        ["Year-1 savings", $(model.year1Savings), $(r.claimModel.year1Savings)],
-        [`${base.lifetime}-year net cash gain`, $(model.totalNet), $(r.claimModel.totalNet)],
-        [`NPV at ${base.discountPct}%`, $(model.npv), $(r.claimModel.npv)],
-      ],
-      [66, 52, 60],
-      8,
-    );
-  }
 
   // Financial model, stress tests, battery and competing quotes.
   report.section("03  /  Economics", "Financial stress test", "The base case is not a forecast. Downside cases expose which assumptions carry the result and provide a structured basis for negotiation.");
@@ -188,7 +173,21 @@ export async function exportAuditPdf(scenario: Scenario, profile: SolarProfile, 
     report.callout("Battery diligence", "Compare the marginal payback with the actual warranty years, throughput or cycle limit, retained-capacity terms, round-trip efficiency and replacement cost. Those physical battery effects are outside this annual model.", "blue");
   }
   report.h2("Cumulative cash-flow trajectory");
-  report.cashflowChart(model.years, (value) => $(value));
+  report.cashflowChart(model.years, (value) => $(value), 45);
+  if (r.claimModel) {
+    report.h2("Sensitivity to the installer's generation claim", "This counterfactual changes only annual yield. It is not an endorsement of the claim.");
+    report.table(
+      ["Metric", "PVGIS baseline", "Installer-yield counterfactual"],
+      [
+        ["Simple payback", model.payback == null ? "Beyond horizon" : `${num(model.payback, 1)} yrs`, r.claimModel.payback == null ? "Beyond horizon" : `${num(r.claimModel.payback, 1)} yrs`],
+        ["Year-1 savings", $(model.year1Savings), $(r.claimModel.year1Savings)],
+        [`${base.lifetime}-year net cash gain`, $(model.totalNet), $(r.claimModel.totalNet)],
+        [`NPV at ${base.discountPct}%`, $(model.npv), $(r.claimModel.npv)],
+      ],
+      [66, 52, 60],
+      8,
+    );
+  }
 
   // Ledger.
   report.section("04  /  Reconciliation", `${base.lifetime}-year cash-flow ledger`, "This appendix is the calculation trail behind the headline metrics. Values are displayed rounded; the underlying model retains full precision.");
@@ -218,7 +217,7 @@ export async function exportAuditPdf(scenario: Scenario, profile: SolarProfile, 
     doc.text(whyLines, PDF_MARGIN + 28, report.y);
     report.y += whyLines.length * 3.8 + 7;
   });
-  report.h2("Questions to send before signing", "These questions are generated from the report's unresolved findings and unconfirmed protections.");
+  report.section("06  /  Negotiation", "Installer question schedule", "Send these questions with the source quote and request written answers. They are generated from the report's unresolved findings and unconfirmed protections.");
   const questions = installerQuestions(r);
   if (!questions.length) report.paragraph("No additional targeted questions were triggered. Still request the final itemised contract, warranty documents and a written generation method before signing.", { color: PDF_COLOR.ink });
   questions.forEach((question, index) => {
@@ -235,7 +234,7 @@ export async function exportAuditPdf(scenario: Scenario, profile: SolarProfile, 
   });
 
   // Methodology is its own clean closing section so it cannot be orphaned.
-  report.section("06  /  Governance", "Methodology, provenance & limitations", "This closing record defines what the dossier can and cannot establish. Keep it with the source quote and the PVGIS settings used.");
+  report.section("07  /  Governance", "Methodology, provenance & limitations", "This closing record defines what the dossier can and cannot establish. Keep it with the source quote and the PVGIS settings used.");
   report.h2("Evidence hierarchy");
   report.keyValues([
     ["Location-specific solar evidence", `EU JRC PVGIS 5.3 / ${profile.radiationDb} / ${profile.period}`],

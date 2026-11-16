@@ -118,7 +118,7 @@ export async function exportScenarioPdf(scenario: Scenario, profile: SolarProfil
     ["Final cumulative cash flow", $(result.totalNet)],
   ]);
   report.h2("Cumulative cash flow", "The curve includes the initial outlay, escalating savings, maintenance and any modelled inverter replacement.");
-  report.cashflowChart(result.years, (value) => $(value));
+  report.cashflowChart(result.years, (value) => $(value), 42);
   report.h2("Complete model assumptions");
   report.keyValues([
     ["Installed price / grant", `${$(values.costPerKw)}/kWp / ${$(values.grant)}`],
@@ -140,9 +140,13 @@ export async function exportScenarioPdf(scenario: Scenario, profile: SolarProfil
     [11, 20, 20, 20, 22, 18, 20, 22, 25],
     7.1,
   );
-  report.h2("Methodology, sources & limitations");
+  report.section("04  /  Method", "Methodology, sources & limitations", "This reproducibility note defines the evidence and calculations behind the memorandum. Keep it with the assumptions and ledger for a complete audit trail.");
+  report.h2("Solar evidence");
   report.paragraph("Generation: EU JRC PVGIS 5.3 PVcalc, crystalline silicon, fixed mounting, terrain horizon and the stated tilt, aspect and losses. Source: https://re.jrc.ec.europa.eu/pvg_tools/en/. Solar data (c) European Union, PVGIS. The reference period describes the climate dataset; it is not a forecast of any individual future year.");
+  report.h2("Financial definitions");
   report.paragraph("Economics: annual model. Generation degrades geometrically. Self-used energy is generation multiplied by the self-use percentage, capped at annual electricity usage. Avoided-import and export revenues escalate independently. NPV discounts annual net cash flows and the upfront cost; IRR solves the annual cash-flow series; simple payback is interpolated within the crossing year. The discounted lifetime cost per generated kWh includes upfront, maintenance and replacement costs divided by discounted generation.");
+  report.h2("Material exclusions");
   report.paragraph("Not modelled: hourly demand or solar matching, battery operation and degradation, shading objects, roof structure, electrical works, financing, taxes, tariff eligibility, curtailment, downtime, insurance, grant rules or residual value. Verify these with qualified professionals and official sources before making a commitment.");
+  report.callout("Reproduce before relying", "Confirm the coordinates, roof settings, data-retrieval date and every financial input against your own quote and electricity bill. Re-run the report if any assumption changes; do not compare outputs generated from different inputs.", "blue");
   return report.finish(`${reportSlug(scenario.name, "solar-scenario")}-investment-memorandum.pdf`);
 }
