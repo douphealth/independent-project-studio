@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as MethodologyRouteImport } from './routes/methodology'
+import { Route as ScenariosRouteImport } from './routes/scenarios'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as CitiesIndexRouteImport } from './routes/cities.index'
 import { Route as CitiesSlugRouteImport } from './routes/cities.$slug'
@@ -36,6 +37,11 @@ const CompareRoute = CompareRouteImport.update({
 const MethodologyRoute = MethodologyRouteImport.update({
   id: '/methodology',
   path: '/methodology',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScenariosRoute = ScenariosRouteImport.update({
+  id: '/scenarios',
+  path: '/scenarios',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
+  '/scenarios': typeof ScenariosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/cities/$slug': typeof CitiesSlugRoute
   '/countries/$slug': typeof CountriesSlugRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
+  '/scenarios': typeof ScenariosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/cities/$slug': typeof CitiesSlugRoute
   '/countries/$slug': typeof CountriesSlugRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
+  '/scenarios': typeof ScenariosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/cities/$slug': typeof CitiesSlugRoute
   '/countries/$slug': typeof CountriesSlugRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/calculator'
     | '/compare'
     | '/methodology'
+    | '/scenarios'
     | '/sitemap.xml'
     | '/cities/$slug'
     | '/countries/$slug'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/calculator'
     | '/compare'
     | '/methodology'
+    | '/scenarios'
     | '/sitemap.xml'
     | '/cities/$slug'
     | '/countries/$slug'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/calculator'
     | '/compare'
     | '/methodology'
+    | '/scenarios'
     | '/sitemap.xml'
     | '/cities/$slug'
     | '/countries/$slug'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   CalculatorRoute: typeof CalculatorRoute
   CompareRoute: typeof CompareRoute
   MethodologyRoute: typeof MethodologyRoute
+  ScenariosRoute: typeof ScenariosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CitiesSlugRoute: typeof CitiesSlugRoute
   CountriesSlugRoute: typeof CountriesSlugRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/methodology'
       fullPath: '/methodology'
       preLoaderRoute: typeof MethodologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scenarios': {
+      id: '/scenarios'
+      path: '/scenarios'
+      fullPath: '/scenarios'
+      preLoaderRoute: typeof ScenariosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalculatorRoute: CalculatorRoute,
   CompareRoute: CompareRoute,
   MethodologyRoute: MethodologyRoute,
+  ScenariosRoute: ScenariosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CitiesSlugRoute: CitiesSlugRoute,
   CountriesSlugRoute: CountriesSlugRoute,

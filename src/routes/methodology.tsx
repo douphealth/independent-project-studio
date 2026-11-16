@@ -1,53 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
+import { ContentPage } from "@/components/ContentPage";
 import { SITE_URL } from "@/lib/cities";
 
-const T = "Methodology & limitations — how SolarPayback calculates payback";
-const D = "Data sources, formulas and known limitations behind SolarPayback's solar payback, NPV, IRR and LCOE estimates.";
-
+const T = "Solar payback methodology, formulas & limits | SolarPayback";
+const D = "Exact PVGIS assumptions and formulas behind SolarPayback's production, self-use, payback, NPV, IRR, LCOE, maintenance and inverter replacement estimates.";
 export const Route = createFileRoute("/methodology")({
-  head: () => ({
-    meta: [
-      { title: T }, { name: "description", content: D },
-      { property: "og:title", content: T }, { property: "og:description", content: D },
-      { property: "og:type", content: "article" }, { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [{ rel: "canonical", href: SITE_URL + "/methodology" }],
-  }),
-  component: () => (
-    <div className="min-h-screen">
-      <SiteHeader />
-      <main className="mx-auto max-w-3xl px-5 py-12">
-        <h1 className="text-4xl font-semibold sm:text-5xl">Methodology & limitations</h1>
-        <div className="mt-10 space-y-10 leading-relaxed text-muted-foreground [&_h2]:mb-3 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-foreground [&_strong]:text-foreground">
-          <section>
-            <h2>Solar data</h2>
-            <p>Production comes from the European Commission JRC <strong>PVGIS 5.3</strong> PVcalc service, requested live for each location: crystalline silicon, 1 kWp, fixed 30° tilt, due south, 14% system losses, with terrain horizon. Results are long-term averages of the satellite radiation record shown on each page.</p>
-          </section>
-          <section>
-            <h2>Financial model</h2>
-            <ul className="list-disc space-y-2 pl-5">
-              <li>Upfront = system size × installed cost − grant.</li>
-              <li>Generation in year <em>n</em> = yield × size × (1 − degradation)<sup>n−1</sup>.</li>
-              <li>Self-used energy = generation × self-use share, capped at your annual consumption. The remainder is exported.</li>
-              <li>Savings = self-used × import price + exported × export price, both escalated yearly.</li>
-              <li>Cash flow = savings − maintenance. Payback is the interpolated year cumulative cash first reaches zero.</li>
-              <li>NPV and LCOE are discounted at 4%; IRR is solved by bisection.</li>
-            </ul>
-          </section>
-          <section>
-            <h2>What this does not know</h2>
-            <ul className="list-disc space-y-2 pl-5">
-              <li>Your roof's real orientation, shading and structure — an on-site survey is required.</li>
-              <li>Hourly consumption. The self-use share is an assumption; batteries and daytime usage raise it.</li>
-              <li>Local tariffs, taxes, net-metering rules and inverter or battery replacement costs.</li>
-              <li>Default prices are illustrative, not market data for any city.</li>
-            </ul>
-          </section>
-          <p className="rounded-2xl border border-border bg-card p-5 text-sm">SolarPayback provides estimates only. It is not financial, tax or engineering advice.</p>
-        </div>
-      </main>
-      <SiteFooter />
-    </div>
-  ),
+  head: () => ({ meta: [{ title: T }, { name: "description", content: D }, { property: "og:title", content: T }, { property: "og:description", content: D }, { property: "og:type", content: "article" }, { property: "og:url", content: `${SITE_URL}/methodology` }, { name: "twitter:card", content: "summary_large_image" }], links: [{ rel: "canonical", href: `${SITE_URL}/methodology` }] }),
+  component: () => <ContentPage eyebrow="Methodology & limitations" title="Every assumption in the open." intro="A solar payback estimate is only useful if you can inspect its data, formulas and blind spots. This is exactly what the current model does—and does not do.">
+    <section><h2>Solar production data</h2><p>Production comes from the European Commission JRC <a href="https://re.jrc.ec.europa.eu/pvgis.html" target="_blank" rel="noreferrer">PVGIS 5.3 PVcalc service</a>. Requests use crystalline silicon, 1 kWp peak power, fixed tilt and aspect, a configurable system-loss percentage and terrain horizon. Directory pages use 30° tilt, due south (aspect 0°) and 14% losses so cities remain comparable.</p><p>The annual value is PVGIS <strong>E_y</strong> for 1 kWp; monthly values are <strong>E_m</strong>. Year-to-year variation is PVGIS <strong>SD_y</strong>. These are long-term modelled estimates from satellite radiation records, not measurements on an individual roof.</p><h3>Caching and failure behavior</h3><p>Profiles are cached for 24 hours in the serving environment and may be served with shared cache headers. If a refresh fails and an older cached profile exists, that profile is returned with a visible stale-data notice. If no profile exists, the city reports a service failure rather than inventing a value.</p></section>
+    <section><h2>Energy allocation</h2><ul className="list-disc space-y-2 pl-5"><li>Generation in year n = annual yield × system size × (1 − degradation)<sup>n−1</sup>.</li><li>Self-used energy = generation × self-use share, capped at annual household consumption.</li><li>Exported energy = generation − self-used energy.</li><li>Import savings = self-used energy × import tariff, escalated at the import escalation rate.</li><li>Export revenue = exported energy × export tariff, escalated independently.</li></ul><p>The self-use percentage is an annual user assumption. It does not infer hourly behavior from an annual total.</p></section>
+    <section><h2>Cash flow and investment metrics</h2><ul className="list-disc space-y-2 pl-5"><li>Upfront cost = system size × installed cost per kWp − confirmed grant, floored at zero.</li><li>Maintenance = system size × annual maintenance per kWp, escalated at the maintenance escalation rate.</li><li>Inverter replacement is deducted in the selected year when enabled; replacement cost is zero by default only if the user excludes it.</li><li>Annual net cash flow = import savings + export revenue − maintenance − replacement.</li><li>Simple payback is interpolated within the year cumulative undiscounted cash first reaches zero.</li><li>NPV discounts upfront and annual flows at the selected discount rate.</li><li>IRR is solved by bisection across −99% to 100% and is blank when no sign change exists in that interval.</li><li>LCOE = discounted upfront, maintenance and replacement costs ÷ discounted generation.</li></ul></section>
+    <section><h2>Reference payback in the directory</h2><p>Reference economics use one common illustrative scenario to make cities comparable. They are <strong>not local installation prices, tariff estimates or recommended system sizes</strong>. Always replace the defaults with your own quote and bill.</p></section>
+    <section><h2>What the model does not know</h2><ul className="list-disc space-y-2 pl-5"><li>Hourly consumption, interval-meter data, battery dispatch, round-trip losses, depth of discharge or battery degradation.</li><li>Roof-specific shading, structural suitability, usable area, cable routes, planning restrictions or equipment downtime.</li><li>Fixed bill charges, time-of-use tariffs, taxes, net-metering rules or tariff changes unless explicitly entered.</li><li>Panel-level failures, warranty outcomes, insurance, financing interest, taxes and residual equipment value.</li></ul><p>For a battery or complex-tariff decision, use an hourly model with real consumption data and a site-specific engineering assessment.</p></section>
+    <section><h2>Reproducibility</h2><p>CSV and PDF exports include the scenario assumptions, solar source period, retrieval date and annual cash-flow ledger. Saved scenarios include a dated profile snapshot. Shared scenarios request a current profile and can therefore differ if PVGIS updates its data.</p></section>
+  </ContentPage>,
 });
