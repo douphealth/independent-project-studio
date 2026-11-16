@@ -50,7 +50,7 @@ export type AuditResult = {
   scenarios: { label: string; payback: number | null; npv: number; totalNet: number }[];
   battery: null | { withBattery: Result; marginalCost: number; marginalYear1Saving: number; simplePayback: number | null; npvDelta: number; verdict: Severity };
   priceRank: null | { position: number; of: number; cheapest: number; dearest: number; diffToCheapestPct: number };
-  breakEvenCostPerKw: number | null; // max cost/kWp that still pays back within lifetime
+  breakEvenCostPerKw: number | null; // max cost/kWp at which NPV remains >= 0
   contractScore: { met: number; total: number; missingCritical: string[]; missing: string[] };
 };
 
@@ -108,7 +108,7 @@ export function runAudit(a: AuditInput): AuditResult {
 
   // 4. Self-consumption realism (physical bound: cannot self-use more than demand)
   const gen = pvgisAnnualKwh;
-  if (a.base.selfUsePct > 60 && !a.battery) { score -= 6; findings.push({ area: "Self-use", severity: "caution", title: `${a.base.selfUsePct}% self-consumption without a battery is ambitious`, detail: "Homes without storage or significant daytime load typically self-consume well under half of generation. Test a lower value." }); }
+  if (a.base.selfUsePct > 60 && !a.battery) { score -= 6; findings.push({ area: "Self-use", severity: "caution", title: `${a.base.selfUsePct}% self-consumption without a battery needs evidence`, detail: `This assumes ${Math.round(gen * a.base.selfUsePct / 100)} kWh of year-1 generation coincides with household demand. Validate it with interval meter data and a lower self-use sensitivity; the annual model cannot establish hourly coincidence.` }); }
   if (a.base.annualUsageKwh > 0 && gen > a.base.annualUsageKwh * 1.5) { score -= 5; findings.push({ area: "Sizing", severity: "caution", title: `System generates ${(gen / a.base.annualUsageKwh * 100).toFixed(0)}% of your annual use`, detail: "Most extra generation is exported at the lower export rate. A smaller system may give a better return." }); }
 
   // 5. Profitability & downside scenarios
@@ -152,7 +152,7 @@ export function runAudit(a: AuditInput): AuditResult {
     const verdict: Severity = npvDelta >= 0 ? "pass" : simplePayback != null && simplePayback < a.base.lifetime * 0.6 ? "caution" : "fail";
     battery = { withBattery, marginalCost, marginalYear1Saving, simplePayback, npvDelta, verdict };
     if (verdict === "fail") score -= 10;
-    findings.push({ area: "Battery", severity: verdict, title: npvDelta >= 0 ? "Battery adds value" : "Battery reduces the overall return", detail: `Adds ${$(marginalYear1Saving)} in year-1 savings for ${$(marginalCost)} extra; simple battery payback ${simplePayback == null ? "never" : simplePayback.toFixed(1) + " yrs"}; NPV change ${npvDelta >= 0 ? "+" : ""}${$(npvDelta)}. Battery warranties are usually shorter than panel life.` });
+    findings.push({ area: "Battery", severity: verdict, title: npvDelta >= 0 ? "Battery adds value in this annual model" : "Battery reduces the modelled overall return", detail: `Adds ${$(marginalYear1Saving)} in year-1 savings for ${$(marginalCost)} extra; simple battery payback ${simplePayback == null ? "never" : simplePayback.toFixed(1) + " yrs"}; NPV change ${npvDelta >= 0 ? "+" : ""}${$(npvDelta)}. Compare this with the actual warranty, efficiency and replacement terms, which the annual model does not simulate.` });
   }
 
   // 8. Contract protections
@@ -166,7 +166,7 @@ export function runAudit(a: AuditInput): AuditResult {
   score = Math.max(0, Math.min(100, Math.round(score)));
   const grade = score >= 85 ? "A" : score >= 70 ? "B" : score >= 55 ? "C" : score >= 40 ? "D" : "E";
   const fails = findings.filter((f) => f.severity === "fail").length;
-  const verdict = grade === "A" ? "Strong quote: claims are credible and the economics hold under stress." : grade === "B" ? "Good quote with points to clarify before signing." : grade === "C" ? `Proceed only after resolving ${fails || "the"} flagged issue${fails === 1 ? "" : "s"}.` : grade === "D" ? "Significant problems: renegotiate or obtain alternative quotes." : "Do not sign as quoted: claims or economics do not stand up.";
+  const verdict = grade === "A" ? "No major exception in this screening; verify the site and contract before signing." : grade === "B" ? "Promising screening result with points to clarify before signing." : grade === "C" ? `Resolve ${fails || "the"} flagged issue${fails === 1 ? "" : "s"} before treating the quote as reliable.` : grade === "D" ? "Significant screening issues: renegotiate or obtain alternative quotes." : "The entered claims or economics fail multiple screening checks; do not rely on the quote as presented.";
   return { score, grade, verdict, findings, model, pvgisAnnualKwh, yieldGapPct, claimedYieldPerKwp, paybackGapYears, savingsGapPct, claimModel, scenarios, battery, priceRank, breakEvenCostPerKw: be, contractScore: { met: CONTRACT_ITEMS.length - missing.length, total: CONTRACT_ITEMS.length, missingCritical, missing: missing.map((m) => m.label) } };
 }
 
