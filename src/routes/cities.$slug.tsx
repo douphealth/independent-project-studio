@@ -55,8 +55,8 @@ export const Route = createFileRoute("/cities/$slug")({
 
 function CityPage() {
   const { city, profile } = Route.useLoaderData();
-  const best = [...profile.monthly].sort((a, b) => b.kwh - a.kwh)[0];
-  const worst = [...profile.monthly].sort((a, b) => a.kwh - b.kwh)[0];
+  const best = [...profile.monthly].sort((a, b) => b.kwh - a.kwh)[0]!;
+  const worst = [...profile.monthly].sort((a, b) => a.kwh - b.kwh)[0]!;
   const ref = calculate({ ...DEFAULTS, annualKwhPerKwp: profile.annualKwhPerKwp });
   const nearby = CITIES.filter((c) => c.slug !== city.slug)
     .map((c) => ({ c, d: Math.hypot(c.lat - city.lat, c.lon - city.lon) }))
