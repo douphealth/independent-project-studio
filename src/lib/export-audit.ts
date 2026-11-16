@@ -27,9 +27,13 @@ export async function exportAuditPdf(scenario: Scenario, profile: SolarProfile, 
   doc.setFillColor(...PDF_COLOR.navy);
   doc.rect(0, 0, PDF_W, 122, "F");
   doc.setFillColor(...PDF_COLOR.sun);
-  doc.circle(PDF_W - 28, 31, 17, "F");
-  doc.setFillColor(...PDF_COLOR.navy);
-  doc.circle(PDF_W - 22, 26, 15, "F");
+  doc.circle(PDF_W - 29, 32, 15, "F");
+  doc.setDrawColor(...PDF_COLOR.sun);
+  doc.setLineWidth(0.8);
+  for (let ray = 0; ray < 8; ray++) {
+    const angle = ray * Math.PI / 4;
+    doc.line(PDF_W - 29 + Math.cos(angle) * 19, 32 + Math.sin(angle) * 19, PDF_W - 29 + Math.cos(angle) * 22, 32 + Math.sin(angle) * 22);
+  }
   report.brand(PDF_MARGIN, 21, true);
   report.font(7.5, true, [244, 190, 112]);
   doc.text("INDEPENDENT QUOTE AUDIT  /  EVIDENCE DOSSIER", PDF_MARGIN, 35);

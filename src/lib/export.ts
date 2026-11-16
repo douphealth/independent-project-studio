@@ -48,9 +48,13 @@ export async function exportScenarioPdf(scenario: Scenario, profile: SolarProfil
   doc.setFillColor(...PDF_COLOR.navy);
   doc.rect(0, 0, PDF_W, 116, "F");
   doc.setFillColor(...PDF_COLOR.sun);
-  doc.circle(PDF_W - 29, 33, 17, "F");
-  doc.setFillColor(...PDF_COLOR.navy);
-  doc.circle(PDF_W - 23, 28, 15, "F");
+  doc.circle(PDF_W - 30, 33, 15, "F");
+  doc.setDrawColor(...PDF_COLOR.sun);
+  doc.setLineWidth(0.8);
+  for (let ray = 0; ray < 8; ray++) {
+    const angle = ray * Math.PI / 4;
+    doc.line(PDF_W - 30 + Math.cos(angle) * 19, 33 + Math.sin(angle) * 19, PDF_W - 30 + Math.cos(angle) * 22, 33 + Math.sin(angle) * 22);
+  }
   report.brand(PDF_MARGIN, 22, true);
   report.font(7.6, true, [244, 190, 112]);
   doc.text("INDEPENDENT  /  EVIDENCE-LED  /  ON-DEVICE", PDF_MARGIN, 36);
