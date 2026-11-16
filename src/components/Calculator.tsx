@@ -79,7 +79,7 @@ export function Calculator({ initial }: { initial?: { place: ScenarioPlace; prof
 
   async function choose(p: ScenarioPlace, nextRoof = roof) {
     setHits([]); setPlace(p); setBusy(true); setErr(null); setNotice(null);
-    if (!initialScenario) setCurrency(currencyForCountry(p.country));
+    setCurrency(currencyForCountry(p.country));
     try {
       const next = await pv({ data: { lat: p.lat, lon: p.lon, ...nextRoof } });
       setProfile(next);
@@ -102,9 +102,14 @@ export function Calculator({ initial }: { initial?: { place: ScenarioPlace; prof
   }, [v, profile]);
 
   function update(key: FieldKey, value: number) { setV((s) => ({ ...s, [key]: Number.isFinite(value) ? value : 0 })); setNotice(null); }
-  function save() {
+  function save(asNew = false) {
     if (!scenario || !profile) return;
-    const saved = saveScenario(scenario, savedId, profile); setSavedId(saved.id); setName(saved.name); setNotice("Saved in this browser. Open Saved scenarios to compare quotes.");
+    const saved = saveScenario(scenario, asNew ? undefined : savedId, profile); setSavedId(saved.id); setName(saved.name); setNotice("Saved in this browser. Open Saved scenarios to compare quotes.");
+  }
+  function updateRoof(patch: Partial<RoofOptions>) {
+    setRoof((r) => ({ ...r, ...patch }));
+    setProfile(null);
+    setNotice("Roof settings changed. Select Update solar profile to calculate with the new assumptions.");
   }
   async function share() {
     if (!scenario) return;
@@ -169,9 +174,9 @@ export function Calculator({ initial }: { initial?: { place: ScenarioPlace; prof
               <h3 className="font-semibold">Roof & solar data</h3>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Aspect: 0° south, −90° east, 90° west. Apply to request a new PVGIS profile.</p>
               <div className="mt-5 grid grid-cols-3 gap-3">
-                <RoofInput label="Tilt °" value={roof.angle} min={0} max={90} onChange={(n) => setRoof((r) => ({ ...r, angle: n }))} />
-                <RoofInput label="Aspect °" value={roof.aspect} min={-180} max={180} onChange={(n) => setRoof((r) => ({ ...r, aspect: n }))} />
-                <RoofInput label="Losses %" value={roof.loss} min={0} max={40} onChange={(n) => setRoof((r) => ({ ...r, loss: n }))} />
+                <RoofInput label="Tilt °" value={roof.angle} min={0} max={90} onChange={(n) => updateRoof({ angle: n })} />
+                <RoofInput label="Aspect °" value={roof.aspect} min={-180} max={180} onChange={(n) => updateRoof({ aspect: n }))} />
+                <RoofInput label="Losses %" value={roof.loss} min={0} max={40} onChange={(n) => updateRoof({ loss: n }))} />
               </div>
               <Button type="button" variant="outline" className="mt-4 w-full" disabled={!place || busy} onClick={() => place && choose(place, roof)}>{busy ? <Loader2 className="animate-spin" /> : <ArrowRight />} Update solar profile</Button>
               <h3 className="mt-8 font-semibold">Long-term assumptions</h3>
@@ -194,7 +199,8 @@ export function Calculator({ initial }: { initial?: { place: ScenarioPlace; prof
           </section>
 
           <div className="flex flex-wrap gap-2" aria-label="Scenario actions">
-            <Button type="button" variant="sun" onClick={save} disabled={!scenario || !profile}><Save />{savedId ? "Update saved" : "Save"}</Button>
+            <Button type="button" variant="sun" onClick={() => save()} disabled={!scenario || !profile}><Save />{savedId ? "Update saved" : "Save"}</Button>
+            {savedId && <Button type="button" variant="outline" onClick={() => save(true)} disabled={!scenario || !profile}>Save as new</Button>}
             <Button type="button" variant="outline" onClick={share} disabled={!scenario}><Share2 />Share</Button>
             <Button type="button" variant="outline" onClick={() => scenario && profile && exportScenarioCsv(scenario, profile)} disabled={!scenario || !profile}><Download />CSV</Button>
             <Button type="button" variant="outline" onClick={pdf} disabled={!scenario || !profile || exporting}>{exporting ? <Loader2 className="animate-spin" /> : <FileText />}PDF report</Button>
