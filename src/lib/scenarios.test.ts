@@ -7,7 +7,9 @@ describe("shareable scenarios", () => {
   it("round-trips every assumption through a URL-safe value", () => {
     const encoded = encodeScenario(scenario);
     expect(encoded).not.toContain("{");
+    expect(encoded.startsWith("v1.")).toBe(true);
     expect(decodeScenario(encoded)).toEqual(scenario);
+    expect(decodeScenario(encoded.slice(3))).toEqual(scenario);
   });
   it("rejects malformed or out-of-range scenarios", () => {
     expect(decodeScenario("not-json")).toBeNull();

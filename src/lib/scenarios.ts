@@ -34,13 +34,15 @@ const scenarioSchema = z.object({
 export const DEFAULT_ROOF: RoofOptions = { angle: 30, aspect: 0, loss: 14 };
 
 export function encodeScenario(s: Scenario): string {
-  return encodeURIComponent(JSON.stringify(s));
+  // Keep the router's JSON search parser from turning this into an object.
+  return `v1.${encodeURIComponent(JSON.stringify(s))}`;
 }
 
 export function decodeScenario(raw: unknown): Scenario | null {
   if (typeof raw !== "string" || raw.length > 12000) return null;
   try {
-    const parsed = scenarioSchema.safeParse(JSON.parse(decodeURIComponent(raw)));
+    const encoded = raw.startsWith("v1.") ? raw.slice(3) : raw;
+    const parsed = scenarioSchema.safeParse(JSON.parse(decodeURIComponent(encoded)));
     return parsed.success ? parsed.data : null;
   } catch { return null; }
 }
