@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpDown, Check, MapPin, Search } from "lucide-react";
-import { CITIES, COUNTRY_GUIDES, currencyForCountry } from "@/lib/cities";
+import { CITIES, COUNTRY_GUIDES } from "@/lib/cities";
 import type { SolarProfile } from "@/lib/pvgis.functions";
 import { calculate, DEFAULTS, money, num } from "@/lib/solar";
 import { Input } from "@/components/ui/input";

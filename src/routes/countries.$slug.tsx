@@ -3,7 +3,7 @@ import { ArrowRight, ExternalLink, FileCheck2, Languages, WalletCards } from "lu
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { citiesForCountry, getCountry, SITE_URL } from "@/lib/cities";
 import { getDirectoryProfiles } from "@/lib/pvgis.functions";
-import { calculate, DEFAULTS, money, num } from "@/lib/solar";
+import { calculate, DEFAULTS, num } from "@/lib/solar";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/countries/$slug")({
