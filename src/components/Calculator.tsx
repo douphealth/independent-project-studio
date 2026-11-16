@@ -104,7 +104,7 @@ export function Calculator({ initial }: { initial?: { place: ScenarioPlace; prof
   function update(key: FieldKey, value: number) { setV((s) => ({ ...s, [key]: Number.isFinite(value) ? value : 0 })); setNotice(null); }
   function save() {
     if (!scenario || !profile) return;
-    const saved = saveScenario(scenario, savedId); setSavedId(saved.id); setName(saved.name); setNotice("Saved in this browser. Open Saved scenarios to compare quotes.");
+    const saved = saveScenario(scenario, savedId, profile); setSavedId(saved.id); setName(saved.name); setNotice("Saved in this browser. Open Saved scenarios to compare quotes.");
   }
   async function share() {
     if (!scenario) return;

@@ -1,6 +1,7 @@
 import type { Scenario } from "./scenarios";
+import type { SolarProfile } from "./pvgis.functions";
 
-export type SavedScenario = Scenario & { id: string; updatedAt: string };
+export type SavedScenario = Scenario & { id: string; updatedAt: string; profile?: SolarProfile };
 const KEY = "solarpayback.scenarios.v1";
 
 export function listScenarios(): SavedScenario[] {
@@ -11,8 +12,8 @@ export function listScenarios(): SavedScenario[] {
   } catch { return []; }
 }
 
-export function saveScenario(scenario: Scenario, id?: string): SavedScenario {
-  const saved: SavedScenario = { ...scenario, id: id ?? `s-${Date.now().toString(36)}`, updatedAt: new Date().toISOString() };
+export function saveScenario(scenario: Scenario, id?: string, profile?: SolarProfile): SavedScenario {
+  const saved: SavedScenario = { ...scenario, id: id ?? `s-${Date.now().toString(36)}`, updatedAt: new Date().toISOString(), ...(profile ? { profile } : {}) };
   const rows = listScenarios();
   const index = rows.findIndex((r) => r.id === saved.id);
   if (index >= 0) rows[index] = saved; else rows.unshift(saved);
