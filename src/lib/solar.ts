@@ -1,18 +1,24 @@
-// Pure, deterministic solar investment engine. No network, no side effects.
+// Pure, deterministic solar investment engine. No network or side effects.
+import type { Currency } from "./cities";
+
 export type Inputs = {
-  annualKwhPerKwp: number; // specific yield from PVGIS (kWh/kWp/yr)
+  annualKwhPerKwp: number;
   systemKw: number;
-  costPerKw: number; // installed cost, € per kWp
-  grant: number; // € upfront subsidy
+  costPerKw: number;
+  grant: number;
   annualUsageKwh: number;
-  importPrice: number; // €/kWh
-  exportPrice: number; // €/kWh
-  selfUsePct: number; // share of generation consumed on site, 0-100
+  importPrice: number;
+  exportPrice: number;
+  selfUsePct: number;
   priceEscalationPct: number;
-  degradationPct: number; // per year
+  exportEscalationPct: number;
+  degradationPct: number;
   discountPct: number;
-  omPerKwYear: number; // € per kWp per year
-  lifetime: number; // years
+  omPerKwYear: number;
+  omEscalationPct: number;
+  inverterReplacementYear: number; // 0 disables replacement
+  inverterReplacementCost: number;
+  lifetime: number;
 };
 
 export const DEFAULTS: Omit<Inputs, "annualKwhPerKwp"> = {
@@ -24,9 +30,13 @@ export const DEFAULTS: Omit<Inputs, "annualKwhPerKwp"> = {
   exportPrice: 0.06,
   selfUsePct: 40,
   priceEscalationPct: 2,
+  exportEscalationPct: 1,
   degradationPct: 0.5,
   discountPct: 4,
   omPerKwYear: 15,
+  omEscalationPct: 2,
+  inverterReplacementYear: 12,
+  inverterReplacementCost: 1200,
   lifetime: 25,
 };
 
@@ -37,6 +47,7 @@ export type YearRow = {
   exported: number;
   savings: number;
   om: number;
+  replacement: number;
   cashflow: number;
   cumulative: number;
 };
@@ -44,14 +55,14 @@ export type YearRow = {
 export type Result = {
   upfront: number;
   years: YearRow[];
-  payback: number | null; // fractional years, null if never
+  payback: number | null;
   npv: number;
-  irr: number | null; // percent
+  irr: number | null;
   totalNet: number;
   year1Generation: number;
   year1Savings: number;
   coveragePct: number;
-  lcoe: number; // €/kWh, discounted
+  lcoe: number;
 };
 
 export function validate(i: Inputs): void {
@@ -66,10 +77,14 @@ export function validate(i: Inputs): void {
   chk(i.importPrice, 0, 5, "import price");
   chk(i.exportPrice, 0, 5, "export price");
   chk(i.selfUsePct, 0, 100, "self-use");
-  chk(i.priceEscalationPct, -10, 20, "escalation");
+  chk(i.priceEscalationPct, -10, 20, "import escalation");
+  chk(i.exportEscalationPct, -10, 20, "export escalation");
   chk(i.degradationPct, 0, 5, "degradation");
   chk(i.discountPct, 0, 30, "discount rate");
   chk(i.omPerKwYear, 0, 500, "maintenance");
+  chk(i.omEscalationPct, -10, 20, "maintenance escalation");
+  chk(i.inverterReplacementCost, 0, 1e7, "replacement cost");
+  if (!Number.isInteger(i.inverterReplacementYear) || i.inverterReplacementYear < 0 || i.inverterReplacementYear > i.lifetime) throw new RangeError("Invalid replacement year");
   if (!Number.isInteger(i.lifetime) || i.lifetime < 1 || i.lifetime > 50) throw new RangeError("Invalid lifetime");
 }
 
@@ -94,21 +109,22 @@ export function calculate(i: Inputs): Result {
   let discGen = 0, discCost = upfront;
   for (let y = 1; y <= i.lifetime; y++) {
     const generation = i.annualKwhPerKwp * i.systemKw * Math.pow(1 - i.degradationPct / 100, y - 1);
-    // Self-use can never exceed what the household actually consumes.
     const selfUsed = Math.min(generation * (i.selfUsePct / 100), i.annualUsageKwh);
     const exported = generation - selfUsed;
-    const esc = Math.pow(1 + i.priceEscalationPct / 100, y - 1);
-    const savings = selfUsed * i.importPrice * esc + exported * i.exportPrice * esc;
-    const om = i.omPerKwYear * i.systemKw;
-    const cashflow = savings - om;
+    const importEsc = Math.pow(1 + i.priceEscalationPct / 100, y - 1);
+    const exportEsc = Math.pow(1 + i.exportEscalationPct / 100, y - 1);
+    const savings = selfUsed * i.importPrice * importEsc + exported * i.exportPrice * exportEsc;
+    const om = i.omPerKwYear * i.systemKw * Math.pow(1 + i.omEscalationPct / 100, y - 1);
+    const replacement = y === i.inverterReplacementYear ? i.inverterReplacementCost : 0;
+    const cashflow = savings - om - replacement;
     const prev = cumulative;
     cumulative += cashflow;
     const d = Math.pow(1 + i.discountPct / 100, y);
     npv += cashflow / d;
     discGen += generation / d;
-    discCost += om / d;
-    if (payback === null && prev < 0 && cumulative >= 0) payback = y - 1 + -prev / cashflow;
-    rows.push({ year: y, generation, selfUsed, exported, savings, om, cashflow, cumulative });
+    discCost += (om + replacement) / d;
+    if (payback === null && prev < 0 && cumulative >= 0 && cashflow > 0) payback = y - 1 + -prev / cashflow;
+    rows.push({ year: y, generation, selfUsed, exported, savings, om, replacement, cashflow, cumulative });
   }
   const y1 = rows[0]!;
   return {
@@ -125,6 +141,7 @@ export function calculate(i: Inputs): Result {
   };
 }
 
-export const eur = (n: number, d = 0) =>
-  new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: d }).format(n);
+export const money = (n: number, currency: Currency = "EUR", d = 0) =>
+  new Intl.NumberFormat(currency === "PLN" ? "pl-PL" : currency === "GBP" ? "en-GB" : "en-IE", { style: "currency", currency, maximumFractionDigits: d }).format(n);
+export const eur = (n: number, d = 0) => money(n, "EUR", d);
 export const num = (n: number, d = 0) => new Intl.NumberFormat("en-IE", { maximumFractionDigits: d }).format(n);
