@@ -42,7 +42,7 @@ export function DirectoryExplorer({ entries, filters, onFilters }: { entries: Di
     </section>
     <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
       <p className="text-sm text-muted-foreground" role="status">{filtered.length} {filtered.length === 1 ? "city" : "cities"} · select up to three to compare</p>
-      <Button asChild variant={selected.length > 1 ? "sun" : "outline"} disabled={selected.length < 2}><Link to="/compare" search={{ cities: selected }}>Compare {selected.length || ""} {selected.length === 1 ? "city" : "cities"}<ArrowRight /></Link></Button>
+      {selected.length > 1 ? <Button asChild variant="sun"><Link to="/compare" search={{ cities: selected }}>Compare {selected.length} cities<ArrowRight /></Link></Button> : <Button variant="outline" disabled>Compare {selected.length || ""} {selected.length === 1 ? "city" : "cities"}<ArrowRight /></Button>}
     </div>
     <section className="mt-4 overflow-hidden rounded-3xl border border-border bg-card shadow-soft" aria-label="Solar city results">
       <div className="hidden grid-cols-[44px_1.2fr_1fr_1fr_1fr_36px] gap-4 border-b border-border bg-secondary px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground md:grid"><span /><span>City</span><span>Annual yield</span><span>5 kWp year 1</span><span>Reference payback*</span><span /></div>
