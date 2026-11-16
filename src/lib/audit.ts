@@ -141,7 +141,7 @@ export function runAudit(a: AuditInput): AuditResult {
   // 7. Battery marginal economics
   let battery: AuditResult["battery"] = null;
   if (a.battery && a.battery.cost > 0) {
-    const withBattery = calculate({ ...a.base, grant: a.base.grant - a.battery.cost < 0 ? 0 : a.base.grant, costPerKw: a.base.costPerKw + (a.base.grant - a.battery.cost < 0 ? a.battery.cost - a.base.grant : a.battery.cost) / a.base.systemKw - (a.base.grant - a.battery.cost < 0 ? a.base.grant / a.base.systemKw : 0), selfUsePct: a.battery.selfUsePctWith });
+    const withBattery = calculate({ ...a.base, costPerKw: Math.min(10000, a.base.costPerKw + a.battery.cost / a.base.systemKw), selfUsePct: a.battery.selfUsePctWith });
     const marginalCost = withBattery.upfront - model.upfront;
     const marginalYear1Saving = withBattery.year1Savings - model.year1Savings;
     const simplePayback = marginalYear1Saving > 0 ? marginalCost / marginalYear1Saving : null;
