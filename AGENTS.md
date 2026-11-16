@@ -35,3 +35,4 @@ use the editor.
 - Financial maths lives in `src/lib/solar.ts` as pure functions with tests in `solar.test.ts`; UI must not duplicate formulas.
 - PVGIS/Open-Meteo access stays in server functions and `pvgis.server.ts`; browser code uses typed wrappers so upstream validation, timeouts, and caching remain centralized.
 - Scenario persistence is browser-local in `storage.ts`; share payloads are validated in `scenarios.ts`; exports are generated on-device without a runtime storage service.
+- Quote auditing rules live in `src/lib/audit.ts` (pure, tested); price checks compare only against user-entered quotes, never invented benchmarks.
