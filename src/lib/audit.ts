@@ -1,6 +1,7 @@
 // Pure quote-audit engine. Compares installer claims against PVGIS and the shared financial model.
 // No invented market benchmarks: every check uses PVGIS, the user's own figures or explicit model maths.
-import { calculate, type Inputs, type Result } from "./solar";
+import { calculate, money, type Inputs, type Result } from "./solar";
+import type { Currency } from "./cities";
 
 export type ContractKey =
   | "itemised" | "panelWarranty" | "inverterWarranty" | "workmanship" | "performanceGuarantee"
@@ -28,6 +29,7 @@ export type AuditInput = {
   battery: { cost: number; selfUsePctWith: number } | null; // null = no battery quoted
   otherQuoteCostPerKw: number[]; // user's competing quotes; never invented benchmarks
   contract: Partial<Record<ContractKey, boolean>>;
+  currency?: Currency;
 };
 
 export type Severity = "pass" | "caution" | "fail";
@@ -66,6 +68,7 @@ export function breakEvenCostPerKw(base: Inputs): number | null {
 
 export function runAudit(a: AuditInput): AuditResult {
   const model = calculate(a.base);
+  const $ = (n: number) => money(n, a.currency ?? "EUR");
   const findings: Finding[] = [];
   let score = 100;
   const pvgisAnnualKwh = model.year1Generation;
@@ -78,7 +81,7 @@ export function runAudit(a: AuditInput): AuditResult {
     const sdPct = a.yearToYearSdKwhPerKwp && a.base.annualKwhPerKwp ? (a.yearToYearSdKwhPerKwp / a.base.annualKwhPerKwp) * 100 : 0;
     if (claimedYieldPerKwp >= 100 && claimedYieldPerKwp <= 3000) claimModel = calculate({ ...a.base, annualKwhPerKwp: claimedYieldPerKwp });
     if (yieldGapPct > 12) { score -= 25; findings.push({ area: "Yield", severity: "fail", title: `Generation claim is ${yieldGapPct.toFixed(1)}% above PVGIS`, detail: `The quote promises ${Math.round(a.claimedAnnualKwh)} kWh/yr; PVGIS long-term data for this roof gives ${Math.round(pvgisAnnualKwh)} kWh/yr${sdPct ? ` (normal year-to-year variation ±${sdPct.toFixed(1)}%)` : ""}. Ask the installer for their software, irradiance source, loss and shading assumptions in writing.` }); }
-    else if (yieldGapPct > 5) { score -= 10; findings.push({ area: "Yield", severity: "caution", title: `Generation claim is ${yieldGapPct.toFixed(1)}% above PVGIS`, detail: `Moderately optimistic. Check whether the installer used lower system losses than the ${a.base.annualKwhPerKwp ? "modelled" : ""} PVGIS scenario, and whether the claim is for year 1 only.` }); }
+    else if (yieldGapPct > 5) { score -= 10; findings.push({ area: "Yield", severity: "caution", title: `Generation claim is ${yieldGapPct.toFixed(1)}% above PVGIS`, detail: `Moderately optimistic. Check whether the installer used lower system losses than the modelled PVGIS scenario, and whether the claim is for year 1 only.` }); }
     else findings.push({ area: "Yield", severity: "pass", title: yieldGapPct < -5 ? `Generation claim is conservative (${yieldGapPct.toFixed(1)}% vs PVGIS)` : "Generation claim is consistent with PVGIS", detail: `Claim ${Math.round(a.claimedAnnualKwh)} kWh/yr vs PVGIS ${Math.round(pvgisAnnualKwh)} kWh/yr.` });
   } else { score -= 8; findings.push({ area: "Yield", severity: "caution", title: "No annual generation figure stated", detail: "A quote without a written generation estimate cannot be verified. Request one with the method used." }); }
 
@@ -123,7 +126,7 @@ export function runAudit(a: AuditInput): AuditResult {
   else findings.push({ area: "Return", severity: "pass", title: "Positive return survives combined stress test", detail: "NPV stays positive with 10% lower yield, flat prices and lower self-use." });
 
   const be = breakEvenCostPerKw(a.base);
-  if (be != null && a.base.costPerKw > be) findings.push({ area: "Price", severity: "fail", title: "Quoted price exceeds the break-even price", detail: `The maximum cost at which NPV ≥ 0 is ≈${Math.round(be)} per kWp; the quote is ${Math.round(a.base.costPerKw)}.` });
+  if (be != null && a.base.costPerKw > be) findings.push({ area: "Price", severity: "fail", title: "Quoted price exceeds the break-even price", detail: `The maximum cost at which NPV ≥ 0 is ≈${$(be)} per kWp; the quote is ${$(a.base.costPerKw)}.` });
 
   // 6. Price vs user's own competing quotes
   let priceRank: AuditResult["priceRank"] = null;
@@ -149,7 +152,7 @@ export function runAudit(a: AuditInput): AuditResult {
     const verdict: Severity = npvDelta >= 0 ? "pass" : simplePayback != null && simplePayback < a.base.lifetime * 0.6 ? "caution" : "fail";
     battery = { withBattery, marginalCost, marginalYear1Saving, simplePayback, npvDelta, verdict };
     if (verdict === "fail") score -= 10;
-    findings.push({ area: "Battery", severity: verdict, title: npvDelta >= 0 ? "Battery adds value" : "Battery reduces the overall return", detail: `Adds ${Math.round(marginalYear1Saving)} in year-1 savings for ${Math.round(marginalCost)} extra; simple battery payback ${simplePayback == null ? "never" : simplePayback.toFixed(1) + " yrs"}; NPV change ${npvDelta >= 0 ? "+" : ""}${Math.round(npvDelta)}. Battery warranties are usually shorter than panel life.` });
+    findings.push({ area: "Battery", severity: verdict, title: npvDelta >= 0 ? "Battery adds value" : "Battery reduces the overall return", detail: `Adds ${$(marginalYear1Saving)} in year-1 savings for ${$(marginalCost)} extra; simple battery payback ${simplePayback == null ? "never" : simplePayback.toFixed(1) + " yrs"}; NPV change ${npvDelta >= 0 ? "+" : ""}${$(npvDelta)}. Battery warranties are usually shorter than panel life.` });
   }
 
   // 8. Contract protections

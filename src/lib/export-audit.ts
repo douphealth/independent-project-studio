@@ -126,7 +126,7 @@ export async function exportAuditPdf(scenario: Scenario, profile: SolarProfile, 
   CONTRACT_ITEMS.forEach((ci) => { ensure(14); const ok = !!input.contract[ci.key]; badge(ok ? "pass" : ci.critical ? "fail" : "caution", M, y); font(9.5, "bold"); doc.text(t(ci.label), M + 21, y, { maxWidth: CW - 21 }); y += (doc.splitTextToSize(t(ci.label), CW - 21) as string[]).length * 4.6; para(ci.why, M + 21, CW - 21, 4.2, 8.5); y += 2.5; });
   h2("Questions to send the installer before signing");
   installerQuestions(r).forEach((q, i) => { ensure(10); font(9.5, "bold", SUN); doc.text(`${i + 1}.`, M, y); para(q, M + 7, CW - 7, 4.5, 9.5, INK); y += 1.5; });
-  h2("Methodology & limitations");
+  ensure(40); h2("Methodology & limitations");
   para("Generation: EU JRC PVGIS 5.3 PVcalc, crystalline silicon, fixed mounting, terrain horizon, user-selected tilt/aspect/losses. Economics: annual model with separate import/export escalation, degradation, escalating maintenance and a one-off inverter replacement; payback interpolated within the crossing year; NPV and IRR on annual cash flows; break-even cost by bisection on NPV = 0. Price comparison uses only the quotes you entered - SolarPayback publishes no market price benchmarks. Roof shading, structure, electrical condition, tariff eligibility and grant rules must be verified on site and with official sources. Solar data (c) European Union, PVGIS.", M, CW, 4.2, 8.5);
 
   // footers

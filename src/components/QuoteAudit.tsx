@@ -31,8 +31,8 @@ export function QuoteAudit({ base, profile, scenario, currency }: { base: Inputs
     yearToYearSdKwhPerKwp: profile.yearToYearSdKwh,
     battery: batteryCost > 0 ? { cost: batteryCost, selfUsePctWith: batterySelf } : null,
     otherQuoteCostPerKw: others.split(/[,;\s]+/).map(Number).filter((n) => Number.isFinite(n) && n > 0),
-    contract,
-  }), [base, claimKwh, claimPayback, claimSavings, profile.yearToYearSdKwh, batteryCost, batterySelf, others, contract]);
+    contract, currency,
+  }), [currency, base, claimKwh, claimPayback, claimSavings, profile.yearToYearSdKwh, batteryCost, batterySelf, others, contract]);
   const r = useMemo(() => { try { return runAudit(input); } catch { return null; } }, [input]);
 
   async function download() {
@@ -56,9 +56,9 @@ export function QuoteAudit({ base, profile, scenario, currency }: { base: Inputs
       <div className="grid gap-6 p-6 lg:grid-cols-2">
         <div className="space-y-5">
           <fieldset className="grid gap-3 sm:grid-cols-3"><legend className="mb-2 text-sm font-semibold">Installer's claims (0 = not stated)</legend>
-            <Num id="a-kwh" label="Annual output, kWh" value={claimKwh} onChange={n(setClaimKwh)} />
-            <Num id="a-pb" label="Payback, years" value={claimPayback} onChange={n(setClaimPayback)} step={0.5} />
-            <Num id="a-sv" label={`Year-1 savings, ${currency}`} value={claimSavings} onChange={n(setClaimSavings)} />
+            <Num id="a-kwh" label="Output, kWh/yr" value={claimKwh} onChange={n(setClaimKwh)} />
+            <Num id="a-pb" label="Payback, yrs" value={claimPayback} onChange={n(setClaimPayback)} step={0.5} />
+            <Num id="a-sv" label={`Yr-1 saving, ${currency}`} value={claimSavings} onChange={n(setClaimSavings)} />
           </fieldset>
           <fieldset className="grid gap-3 sm:grid-cols-2"><legend className="mb-2 text-sm font-semibold">Battery in the quote? (0 = none)</legend>
             <Num id="a-bc" label={`Battery price, ${currency}`} value={batteryCost} onChange={n(setBatteryCost)} />
