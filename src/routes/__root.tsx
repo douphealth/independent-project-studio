@@ -12,8 +12,9 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportError } from "../lib/error-reporting";
+import { pageHead } from "../lib/seo";
 
-function NotFoundComponent() {
+export function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -73,29 +74,37 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   );
 }
 
+const shellLinks = [
+  { rel: "stylesheet", href: appCss },
+  { rel: "icon", href: "/favicon.png", type: "image/png" },
+  { rel: "apple-touch-icon", href: "/favicon.png", type: "image/png" },
+  { rel: "preload", href: "/fonts/fraunces-600-latin.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" as const },
+  { rel: "preload", href: "/fonts/manrope-400-latin.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" as const },
+];
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
+  head: ({ matches }) => {
+    const shellMeta = [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SolarPayback — Independent solar payback calculator" },
-      { name: "description", content: "Independent solar panel payback estimates using EU JRC PVGIS data." },
-      { property: "og:site_name", content: "SolarPayback" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#1c2233" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/favicon.png", type: "image/png" },
-      { rel: "preload", href: "/fonts/fraunces-600-latin.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
-      { rel: "preload", href: "/fonts/manrope-400-latin.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
-    ],
-  }),
+    ];
+    if (matches[0]?._notFound) {
+      const path = matches.at(-1)?.pathname || "/";
+      const missing = pageHead({
+        title: "Page not found | SolarPayback",
+        description: "This page does not exist on SolarPayback.",
+        path,
+        noindex: true,
+      });
+      return { meta: [...shellMeta, ...missing.meta], links: [...missing.links, ...shellLinks] };
+    }
+    return {
+      meta: [...shellMeta, { property: "og:site_name", content: "SolarPayback" }],
+      links: shellLinks,
+    };
+  },
+  headers: ({ matches }) => (matches[0]?._notFound ? { "X-Robots-Tag": "noindex" } : undefined),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

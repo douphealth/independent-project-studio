@@ -1,12 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ContentPage } from "@/components/ContentPage";
-import { SITE_URL } from "@/lib/cities";
+import { METHODOLOGY_DESCRIPTION, METHODOLOGY_TITLE, SITE_URL, breadcrumbNode, jsonLdGraph, pageHead } from "@/lib/seo";
 
-const T = "Solar payback methodology, formulas & limits | SolarPayback";
-const D = "Exact PVGIS assumptions and formulas behind SolarPayback's production, self-use, payback, NPV, IRR, LCOE, maintenance and inverter replacement estimates.";
+const CRUMBS = [{ name: "Home", path: "/" }, { name: "Methodology", path: "/methodology" }] as const;
 export const Route = createFileRoute("/methodology")({
-  head: () => ({ meta: [{ title: T }, { name: "description", content: D }, { property: "og:title", content: T }, { property: "og:description", content: D }, { property: "og:type", content: "article" }, { property: "og:url", content: `${SITE_URL}/methodology` }, { name: "twitter:card", content: "summary_large_image" }], links: [{ rel: "canonical", href: `${SITE_URL}/methodology` }] }),
-  component: () => <ContentPage eyebrow="Methodology & limitations" title="Every assumption in the open." intro="A solar payback estimate is only useful if you can inspect its data, formulas and blind spots. This is exactly what the current model does—and does not do.">
+  head: () => pageHead({
+    title: METHODOLOGY_TITLE,
+    description: METHODOLOGY_DESCRIPTION,
+    path: "/methodology",
+    ogType: "article",
+    jsonLd: jsonLdGraph(breadcrumbNode(CRUMBS), {
+      "@type": "Article",
+      headline: "Every assumption in the open.",
+      description: METHODOLOGY_DESCRIPTION,
+      mainEntityOfPage: `${SITE_URL}/methodology`,
+      publisher: { "@type": "Organization", name: "SolarPayback", url: `${SITE_URL}/` },
+    }),
+  }),
+  component: () => <ContentPage eyebrow="Methodology & limitations" title="Every assumption in the open." intro="A solar payback estimate is only useful if you can inspect its data, formulas and blind spots. This is exactly what the current model does—and does not do." crumbs={CRUMBS} related={[{ href: "/calculator", label: "Payback calculator" }, { href: "/about", label: "About SolarPayback" }, { href: "/terms", label: "Terms and limitations" }]}>
     <section><h2>Solar production data</h2><p>Production comes from the European Commission JRC <a href="https://re.jrc.ec.europa.eu/pvgis.html" target="_blank" rel="noreferrer">PVGIS 5.3 PVcalc service</a>. Requests use crystalline silicon, 1 kWp peak power, fixed tilt and aspect, a configurable system-loss percentage and terrain horizon. Directory pages use 30° tilt, due south (aspect 0°) and 14% losses so cities remain comparable.</p><p>The annual value is PVGIS <strong>E_y</strong> for 1 kWp; monthly values are <strong>E_m</strong>. Year-to-year variation is PVGIS <strong>SD_y</strong>. These are long-term modelled estimates from satellite radiation records, not measurements on an individual roof.</p><h3>Caching and failure behavior</h3><p>Profiles are cached for 24 hours in the serving environment and may be served with shared cache headers. If a refresh fails and an older cached profile exists, that profile is returned with a visible stale-data notice. If no profile exists, the city reports a service failure rather than inventing a value.</p></section>
     <section><h2>Energy allocation</h2><ul className="list-disc space-y-2 pl-5"><li>Generation in year n = annual yield × system size × (1 − degradation)<sup>n−1</sup>.</li><li>Self-used energy = generation × self-use share, capped at annual household consumption.</li><li>Exported energy = generation − self-used energy.</li><li>Import savings = self-used energy × import tariff, escalated at the import escalation rate.</li><li>Export revenue = exported energy × export tariff, escalated independently.</li></ul><p>The self-use percentage is an annual user assumption. It does not infer hourly behavior from an annual total.</p></section>
     <section><h2>Cash flow and investment metrics</h2><ul className="list-disc space-y-2 pl-5"><li>Upfront cost = system size × installed cost per kWp − confirmed grant, floored at zero.</li><li>Maintenance = system size × annual maintenance per kWp, escalated at the maintenance escalation rate.</li><li>Inverter replacement is deducted in the selected year when enabled; replacement cost is zero by default only if the user excludes it.</li><li>Annual net cash flow = import savings + export revenue − maintenance − replacement.</li><li>Simple payback is interpolated within the year cumulative undiscounted cash first reaches zero.</li><li>NPV discounts upfront and annual flows at the selected discount rate.</li><li>IRR is solved by bisection across −99% to 100% and is blank when no sign change exists in that interval.</li><li>LCOE = discounted upfront, maintenance and replacement costs ÷ discounted generation.</li></ul></section>

@@ -1,9 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowRight, ExternalLink, FileCheck2, Languages, WalletCards } from "lucide-react";
+import { RelatedLinks } from "@/components/Breadcrumbs";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
-import { citiesForCountry, getCountry, SITE_URL } from "@/lib/cities";
+import { citiesForCountry, getCountry } from "@/lib/cities";
 import { getDirectoryProfiles } from "@/lib/pvgis.functions";
 import { calculate, DEFAULTS, num } from "@/lib/solar";
+import { absoluteUrl, breadcrumbNode, countryDescription, countryTitle, jsonLdGraph, pageHead } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/countries/$slug")({
@@ -15,14 +17,28 @@ export const Route = createFileRoute("/countries/$slug")({
     return { country, entries: cities.map((city) => ({ city, profile: profiles.find((p) => p.slug === city.slug)?.profile ?? null })) };
   },
   staleTime: 24 * 60 * 60 * 1000,
-  head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Country unavailable | SolarPayback" }, { name: "robots", content: "noindex" }] };
+  head: ({ loaderData, match }) => {
+    if (!loaderData) return pageHead({ title: "Country unavailable | SolarPayback", description: "This country is not in the SolarPayback directory.", path: match.pathname, noindex: true });
     const { country, entries } = loaderData;
-    const t = `Solar panels in ${country.name}: city yield guide | SolarPayback`;
-    const d = `Compare live PVGIS solar yield in ${entries.map((e) => e.city.name).join(", ")}. Calculate payback in ${country.currency} and check official energy guidance.`;
-    const url = `${SITE_URL}/countries/${country.slug}`;
-    return { meta: [{ title: t }, { name: "description", content: d }, { property: "og:title", content: t }, { property: "og:description", content: d }, { property: "og:type", content: "article" }, { property: "og:url", content: url }, { name: "twitter:card", content: "summary_large_image" }], links: [{ rel: "canonical", href: url }], scripts: [{ type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Cities", item: `${SITE_URL}/cities` }, { "@type": "ListItem", position: 2, name: country.name, item: url }] }) }] };
+    const crumbs = [
+      { name: "Home", path: "/" },
+      { name: "Cities", path: "/cities" },
+      { name: country.name, path: `/countries/${country.slug}` },
+    ];
+    return pageHead({
+      title: countryTitle(country.name),
+      description: countryDescription(country.name, entries.map((entry) => entry.city.name), country.currency),
+      path: `/countries/${country.slug}`,
+      ogType: "article",
+      jsonLd: jsonLdGraph(breadcrumbNode(crumbs), {
+        "@type": "ItemList",
+        name: `Solar yield in ${country.name}`,
+        numberOfItems: entries.length,
+        itemListElement: entries.map((entry, index) => ({ "@type": "ListItem", position: index + 1, name: entry.city.name, url: absoluteUrl(`/cities/${entry.city.slug}`) })),
+      }),
+    });
   },
+  headers: ({ loaderData }) => (loaderData ? undefined : { "X-Robots-Tag": "noindex" }),
   errorComponent: () => <div className="min-h-screen"><SiteHeader /><main className="mx-auto max-w-2xl px-5 py-24"><h1 className="text-4xl font-semibold">Country data is temporarily unavailable</h1></main><SiteFooter /></div>,
   notFoundComponent: () => <div className="min-h-screen"><SiteHeader /><main className="mx-auto max-w-2xl px-5 py-24"><h1 className="text-4xl font-semibold">Country not found</h1><Button asChild className="mt-6"><Link to="/cities">Browse all cities</Link></Button></main><SiteFooter /></div>,
   component: CountryPage,
@@ -41,6 +57,7 @@ function CountryPage() {
       <section className="rounded-3xl bg-night p-7 text-night-foreground shadow-soft"><h2 className="text-3xl font-semibold">Before you trust a payback quote</h2><ul className="mt-5 space-y-4">{country.checklist.map((item, i) => <li key={item} className="flex gap-3 text-night-muted"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-sun text-xs font-bold text-night">{i + 1}</span><span>{item}</span></li>)}</ul></section>
       <aside className="rounded-3xl border border-border bg-card p-7 shadow-soft"><h2 className="text-2xl font-semibold">Verify the current rules</h2><p className="mt-3 text-sm leading-relaxed text-muted-foreground">Incentives, export arrangements and eligibility can change. We do not claim a grant or tariff without a current, installation-specific source.</p><a href={country.officialSource} target="_blank" rel="noreferrer" className="mt-5 flex items-center justify-between gap-3 rounded-xl border border-border p-4 text-sm font-semibold hover:border-primary hover:text-primary">{country.officialSourceLabel}<ExternalLink className="h-4 w-4 shrink-0" /></a><p className="mt-3 text-xs text-muted-foreground">Official starting point, not a determination of eligibility. Confirm the exact scheme and effective date for your address.</p></aside>
     </div>
+    <RelatedLinks links={[{ href: "/cities", label: "All cities" }, { href: "/calculator", label: "Payback calculator" }, { href: "/methodology", label: "Methodology" }]} />
   </main><SiteFooter /></div>;
 }
 function Info({ icon: Icon, label, value }: { icon: typeof WalletCards; label: string; value: string }) { return <div className="rounded-2xl border border-border bg-card p-5 shadow-soft"><Icon className="h-5 w-5 text-primary" /><p className="mt-3 text-xs text-muted-foreground">{label}</p><p className="mt-1 font-semibold">{value}</p></div>; }

@@ -2,11 +2,13 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { RelatedLinks } from "@/components/Breadcrumbs";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { Calculator } from "@/components/Calculator";
-import { CITIES, citiesForCountry, currencyForCountry, getCity, SITE_URL } from "@/lib/cities";
+import { CITIES, citiesForCountry, currencyForCountry, getCity } from "@/lib/cities";
 import { getDirectoryProfiles, getSolarProfile } from "@/lib/pvgis.functions";
 import { DEFAULTS, calculate, money, num } from "@/lib/solar";
+import { absoluteUrl, breadcrumbNode, cityDescription, cityTitle, jsonLdGraph, pageHead } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -23,21 +25,29 @@ export const Route = createFileRoute("/cities/$slug")({
     return { city, profile, countryProfiles };
   },
   staleTime: 24 * 60 * 60 * 1000,
-  head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "City unavailable | SolarPayback" }, { name: "robots", content: "noindex" }] };
+  head: ({ loaderData, match }) => {
+    if (!loaderData) return pageHead({ title: "City unavailable | SolarPayback", description: "This city is not in the SolarPayback directory.", path: match.pathname, noindex: true });
     const { city, profile } = loaderData;
-    const t = `${city.name} solar yield & payback | SolarPayback`;
-    const d = `${city.name} produces about ${num(profile.annualKwhPerKwp)} kWh/kWp/year (PVGIS). Compare monthly output and calculate payback with your own quote.`;
-    const url = `${SITE_URL}/cities/${city.slug}`;
-    return {
-      meta: [{ title: t }, { name: "description", content: d }, { property: "og:title", content: t }, { property: "og:description", content: d }, { property: "og:type", content: "article" }, { property: "og:url", content: url }, { name: "twitter:card", content: "summary_large_image" }],
-      links: [{ rel: "canonical", href: url }],
-      scripts: [{ type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@graph": [
-        { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name: "Cities", item: `${SITE_URL}/cities` }, { "@type": "ListItem", position: 3, name: city.country, item: `${SITE_URL}/countries/${city.countrySlug}` }, { "@type": "ListItem", position: 4, name: city.name, item: url }] },
-        { "@type": "Dataset", name: `${city.name} solar production profile`, url, description: d, license: "https://commission.europa.eu/legal-notice_en", isAccessibleForFree: true, dateModified: profile.fetchedAt, spatialCoverage: { "@type": "Place", name: `${city.name}, ${city.country}`, geo: { "@type": "GeoCoordinates", latitude: city.lat, longitude: city.lon } }, variableMeasured: ["Annual photovoltaic output kWh/kWp", "Monthly photovoltaic output kWh/kWp"], measurementTechnique: `EU JRC PVGIS 5.3 ${profile.radiationDb}, fixed 30 degree south-facing system`, creator: { "@type": "Organization", name: "European Commission Joint Research Centre", url: "https://re.jrc.ec.europa.eu/pvgis.html" } },
-      ] }) }],
-    };
+    const description = cityDescription(city.name, profile.annualKwhPerKwp);
+    const url = absoluteUrl(`/cities/${city.slug}`);
+    const crumbs = [
+      { name: "Home", path: "/" },
+      { name: "Cities", path: "/cities" },
+      { name: city.country, path: `/countries/${city.countrySlug}` },
+      { name: city.name, path: `/cities/${city.slug}` },
+    ];
+    return pageHead({
+      title: cityTitle(city.name),
+      description,
+      path: `/cities/${city.slug}`,
+      ogType: "article",
+      jsonLd: jsonLdGraph(
+        breadcrumbNode(crumbs),
+        { "@type": "Dataset", name: `${city.name} solar production profile`, url, description, license: "https://commission.europa.eu/legal-notice_en", isAccessibleForFree: true, dateModified: profile.fetchedAt, spatialCoverage: { "@type": "Place", name: `${city.name}, ${city.country}`, geo: { "@type": "GeoCoordinates", latitude: city.lat, longitude: city.lon } }, variableMeasured: ["Annual photovoltaic output kWh/kWp", "Monthly photovoltaic output kWh/kWp"], measurementTechnique: `EU JRC PVGIS 5.3 ${profile.radiationDb}, fixed 30 degree south-facing system`, creator: { "@type": "Organization", name: "European Commission Joint Research Centre", url: "https://re.jrc.ec.europa.eu/pvgis.html" } },
+      ),
+    });
   },
+  headers: ({ loaderData }) => (loaderData ? undefined : { "X-Robots-Tag": "noindex" }),
   errorComponent: () => <div className="min-h-screen"><SiteHeader /><main className="mx-auto max-w-xl px-5 py-24 text-center"><h1 className="text-3xl font-semibold">Solar data is temporarily unavailable</h1><p className="mt-3 text-muted-foreground">No cached profile is available for this city yet. Please retry, or calculate for another location.</p><Button asChild className="mt-6"><Link to="/calculator">Open the calculator</Link></Button></main><SiteFooter /></div>,
   notFoundComponent: () => <div className="min-h-screen"><SiteHeader /><main className="mx-auto max-w-xl px-5 py-24 text-center"><h1 className="text-3xl font-semibold">City not found</h1><p className="mt-3 text-muted-foreground">Try the searchable directory or calculate for any supported location.</p><Button asChild className="mt-6"><Link to="/cities">Browse cities</Link></Button></main><SiteFooter /></div>,
   component: CityPage,
@@ -73,6 +83,7 @@ function CityPage() {
 
     <section className="mt-16"><h2 className="text-3xl font-semibold">Estimate your own payback in {city.name}</h2><p className="mt-2 max-w-2xl text-muted-foreground">Replace every illustrative assumption with your own quote and bill. Adjust roof settings under Advanced.</p><div className="mt-6"><Calculator initial={{ place: { name: city.name, country: city.country, lat: city.lat, lon: city.lon }, profile }} /></div></section>
     <section className="mt-16"><h2 className="text-2xl font-semibold">Nearby solar profiles</h2><div className="mt-4 flex flex-wrap gap-2">{nearby.map((c) => <Link key={c.slug} to="/cities/$slug" params={{ slug: c.slug }} className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium hover:border-primary hover:text-primary">{c.name}<span className="ml-1 text-muted-foreground">· {c.country}</span></Link>)}</div></section>
+    <RelatedLinks links={[{ href: `/countries/${city.countrySlug}`, label: `${city.country} guide` }, { href: "/compare", label: "Compare cities" }, { href: "/methodology", label: "Methodology" }]} />
   </main><SiteFooter /></div>;
 }
 
