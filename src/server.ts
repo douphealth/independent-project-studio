@@ -48,14 +48,40 @@ function isH3SwallowedErrorBody(body: string): boolean {
 // Hosting compresses every response at the edge. Never compress a body (gzip, brotli,
 // CompressionStream) or set content-encoding here or in a server route: the body gets encoded
 // twice and renders garbled.
+// Edge HTML cache for public, query-free pages. City/country pages are CPU-heavy to SSR and the
+// Worker CPU limit was producing intermittent 503s (error 1102) for crawlers. Pages hold no
+// per-user data (scenarios live in the browser), so a short shared cache is safe.
+const HTML_CACHE_SECONDS = 6 * 60 * 60;
+const CACHEABLE_PREFIXES = ["/cities", "/countries", "/compare", "/methodology", "/about", "/privacy", "/terms", "/contact"];
+function edgeCache(): Cache | undefined {
+  try { return (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default; } catch { return undefined; }
+}
+function isCacheable(request: Request) {
+  if (request.method !== "GET") return false;
+  const url = new URL(request.url);
+  return url.hostname === "solarpayback.shop" && !url.search && (url.pathname === "/" || CACHEABLE_PREFIXES.some((p) => url.pathname === p || url.pathname.startsWith(`${p}/`)));
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     const redirect = seoPreflight(request);
     if (redirect) return redirect;
+    const cache = isCacheable(request) ? edgeCache() : undefined;
+    if (cache) {
+      const hit = await cache.match(request.url).catch(() => undefined);
+      if (hit) return hit;
+    }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return seoRewrite(request, await normalizeCatastrophicSsrResponse(response));
+      const final = seoRewrite(request, await normalizeCatastrophicSsrResponse(response));
+      if (cache && final.status === 200 && (final.headers.get("content-type") ?? "").includes("text/html") && !final.headers.has("set-cookie")) {
+        const stored = new Response(final.clone().body, final);
+        stored.headers.set("cache-control", `public, max-age=${HTML_CACHE_SECONDS}`);
+        const put = cache.put(request.url, stored).catch(() => undefined);
+        (ctx as { waitUntil?: (p: Promise<unknown>) => void } | undefined)?.waitUntil?.(put);
+      }
+      return final;
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
