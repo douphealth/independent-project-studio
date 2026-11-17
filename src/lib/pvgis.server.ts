@@ -43,16 +43,39 @@ function remember(map: Map<string, CacheEntry>, key: string, entry: CacheEntry) 
   map.set(key, entry);
 }
 
+// Edge-shared cache (Cloudflare Cache API) so live PVGIS results survive across isolates.
+// Prevents crawler-visible 500s when PVGIS rate-limits or times out. Data is still fetched live
+// from PVGIS; this only stores the last good live response.
+const EDGE_CACHE_HOST = "https://pvgis-cache.internal/";
+function edgeCache(): Cache | null {
+  try { return (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default ?? null; } catch { return null; }
+}
+async function edgeGet(key: string): Promise<CacheEntry | null> {
+  const c = edgeCache(); if (!c) return null;
+  try { const r = await c.match(EDGE_CACHE_HOST + encodeURIComponent(key)); return r ? ((await r.json()) as CacheEntry) : null; } catch { return null; }
+}
+async function edgePut(key: string, entry: CacheEntry) {
+  const c = edgeCache(); if (!c) return;
+  try { await c.put(EDGE_CACHE_HOST + encodeURIComponent(key), new Response(JSON.stringify(entry), { headers: { "content-type": "application/json", "cache-control": "public, max-age=2592000" } })); } catch { /* best effort */ }
+}
+async function fetchWithRetry(u: URL, signal: AbortSignal): Promise<Response> {
+  const res = await fetch(u, { signal, headers: { accept: "application/json" } });
+  if (res.ok || signal.aborted) return res;
+  await new Promise((r) => setTimeout(r, 600));
+  return fetch(u, { signal, headers: { accept: "application/json" } });
+}
+
 export async function fetchSolarProfile(q: ProfileQuery): Promise<SolarProfile> {
   const key = [q.lat.toFixed(4), q.lon.toFixed(4), q.angle, q.aspect, q.loss].join(":");
-  const cached = profileCache.get(key);
+  let cached = profileCache.get(key);
+  if (!cached) { const e = await edgeGet(key); if (e) { cached = e; remember(profileCache, key, e); } }
   if (cached && Date.now() - cached.storedAt < FRESH_MS) return { ...cached.profile, stale: false };
   const u = new URL("https://re.jrc.ec.europa.eu/api/v5_3/PVcalc");
   u.search = new URLSearchParams({ lat: q.lat.toFixed(4), lon: q.lon.toFixed(4), peakpower: "1", loss: String(q.loss), angle: String(q.angle), aspect: String(q.aspect), outputformat: "json" }).toString();
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 12000);
   try {
-    const res = await fetch(u, { signal: ctrl.signal, headers: { accept: "application/json" } });
+    const res = await fetchWithRetry(u, ctrl.signal);
     if (!res.ok) throw new Error(`PVGIS responded ${res.status}`);
     const parsed = pvgisSchema.safeParse(await res.json());
     if (!parsed.success) throw new Error("PVGIS returned an unexpected response");
@@ -66,7 +89,9 @@ export async function fetchSolarProfile(q: ProfileQuery): Promise<SolarProfile> 
       monthly: j.outputs.monthly.fixed.map((m) => ({ month: m.month, kwh: m.E_m, irradiation: m["H(i)_m"] })),
       fetchedAt: new Date().toISOString(), stale: false,
     };
-    remember(profileCache, key, { profile, storedAt: Date.now() });
+    const entry = { profile, storedAt: Date.now() };
+    remember(profileCache, key, entry);
+    await edgePut(key, entry);
     return profile;
   } catch (error) {
     if (cached) return { ...cached.profile, stale: true };

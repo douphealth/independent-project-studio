@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://solar-payback-93s.pages.dev/sitemap.xml
+Sitemap: https://solarpayback.shop/sitemap.xml

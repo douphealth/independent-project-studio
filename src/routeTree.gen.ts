@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as MethodologyRouteImport } from './routes/methodology'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ScenariosRouteImport } from './routes/scenarios'
@@ -46,6 +47,11 @@ const CompareRoute = CompareRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MethodologyRoute = MethodologyRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
   '/contact': typeof ContactRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
   '/scenarios': typeof ScenariosRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
   '/contact': typeof ContactRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
   '/scenarios': typeof ScenariosRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
   '/contact': typeof ContactRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
   '/scenarios': typeof ScenariosRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/calculator'
     | '/compare'
     | '/contact'
+    | '/llms.txt'
     | '/methodology'
     | '/privacy'
     | '/scenarios'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/calculator'
     | '/compare'
     | '/contact'
+    | '/llms.txt'
     | '/methodology'
     | '/privacy'
     | '/scenarios'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/calculator'
     | '/compare'
     | '/contact'
+    | '/llms.txt'
     | '/methodology'
     | '/privacy'
     | '/scenarios'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   CalculatorRoute: typeof CalculatorRoute
   CompareRoute: typeof CompareRoute
   ContactRoute: typeof ContactRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   MethodologyRoute: typeof MethodologyRoute
   PrivacyRoute: typeof PrivacyRoute
   ScenariosRoute: typeof ScenariosRoute
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/methodology': {
@@ -301,6 +321,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalculatorRoute: CalculatorRoute,
   CompareRoute: CompareRoute,
   ContactRoute: ContactRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   MethodologyRoute: MethodologyRoute,
   PrivacyRoute: PrivacyRoute,
   ScenariosRoute: ScenariosRoute,
