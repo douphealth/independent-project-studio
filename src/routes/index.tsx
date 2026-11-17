@@ -3,28 +3,22 @@ import { ArrowRight, BadgeCheck, ChartNoAxesCombined, Database, Download, Folder
 import hero from "@/assets/hero-rooftop.jpg";
 import { Button } from "@/components/ui/button";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
-import { CITIES, COUNTRY_GUIDES, SITE_URL } from "@/lib/cities";
-
-const TITLE = "SolarPayback — When will solar panels pay for themselves?";
-const DESC = "Independent solar payback calculator using live EU PVGIS data. Compare cities, save installer quotes and export a transparent investment report.";
-const SOCIAL = `${SITE_URL}/solarpayback-social.jpg`;
+import { CITIES, COUNTRY_GUIDES } from "@/lib/cities";
+import { HOME_DESCRIPTION, HOME_TITLE, jsonLdGraph, organizationNode, pageHead, websiteNode } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: TITLE }, { name: "description", content: DESC }, { property: "og:title", content: TITLE }, { property: "og:description", content: DESC },
-      { property: "og:type", content: "website" }, { property: "og:url", content: `${SITE_URL}/` }, { property: "og:image", content: SOCIAL },
-      { name: "twitter:card", content: "summary_large_image" }, { name: "twitter:image", content: SOCIAL },
-    ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
-    scripts: [{ type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "WebSite", name: "SolarPayback", url: SITE_URL, potentialAction: { "@type": "SearchAction", target: `${SITE_URL}/cities?q={search_term_string}`, "query-input": "required name=search_term_string" } }) }],
+  head: () => pageHead({
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    path: "/",
+    jsonLd: jsonLdGraph(organizationNode(), websiteNode()),
   }),
   component: Home,
 });
 
 function Home() {
   return <div className="min-h-screen"><SiteHeader overlay /><main>
-    <section className="relative isolate min-h-[88vh] overflow-hidden bg-night text-night-foreground"><img src={hero} alt="Solar panels on a whitewashed Mediterranean roof at sunset" width={1600} height={1008} fetchPriority="high" className="absolute inset-0 -z-10 h-full w-full object-cover" /><div className="absolute inset-0 -z-10 bg-dusk" /><div className="mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-5 pb-20 pt-32"><p className="animate-rise text-sm font-semibold uppercase tracking-[0.25em] text-primary-glow">Independent · No installer commissions</p><h1 className="animate-rise mt-4 max-w-3xl text-5xl font-semibold leading-[1.02] sm:text-7xl" style={{ animationDelay: "80ms" }}>Know when your roof <em className="text-sun not-italic">pays you back.</em></h1><p className="animate-rise mt-6 max-w-xl text-lg text-night-foreground/80" style={{ animationDelay: "160ms" }}>Live solar estimates from the EU's PVGIS service, your actual electricity price, and transparent maths. No sign-up, no sales calls.</p><div className="animate-rise mt-9 flex flex-wrap gap-3" style={{ animationDelay: "240ms" }}><Button asChild variant="sun" size="xl"><Link to="/calculator">Calculate my payback<ArrowRight /></Link></Button><Button asChild variant="glass" size="xl"><Link to="/cities">Compare city data</Link></Button></div><div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-night-muted"><span>24 city profiles</span><span>Real PDF & CSV reports</span><span>Private on your device</span></div></div></section>
+    <section className="relative isolate min-h-[88vh] overflow-hidden bg-night text-night-foreground"><img src={hero} alt="Solar panels on a whitewashed Mediterranean roof at sunset" width={1600} height={1008} fetchPriority="high" className="absolute inset-0 -z-10 h-full w-full object-cover" /><div className="absolute inset-0 -z-10 bg-dusk" /><div className="mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-5 pb-20 pt-32"><p className="animate-rise text-sm font-semibold uppercase tracking-[0.25em] text-primary-glow">Independent · No installer commissions</p><h1 className="animate-rise mt-4 max-w-3xl text-5xl font-semibold leading-[1.02] sm:text-7xl" style={{ animationDelay: "80ms" }}>Know when your roof <em className="text-sun not-italic">pays you back.</em></h1><p className="animate-rise mt-6 max-w-xl text-lg text-night-foreground/80" style={{ animationDelay: "160ms" }}>SolarPayback estimates when rooftop solar pays for itself, using live EU PVGIS production, your electricity price, and your installer quote. No sign-up and no sales calls.</p><div className="animate-rise mt-9 flex flex-wrap gap-3" style={{ animationDelay: "240ms" }}><Button asChild variant="sun" size="xl"><Link to="/calculator">Calculate my payback<ArrowRight /></Link></Button><Button asChild variant="glass" size="xl"><Link to="/cities">Compare city data</Link></Button></div><div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-night-muted"><span>24 city profiles</span><span>Real PDF & CSV reports</span><span>Private on your device</span></div></div></section>
 
     <section className="mx-auto max-w-6xl px-5 py-24"><div className="grid gap-12 md:grid-cols-[1fr_1.4fr]"><div><p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">A better solar decision</p><h2 className="mt-3 text-4xl font-semibold leading-tight sm:text-5xl">Honest numbers beat a glossy sales quote.</h2><p className="mt-5 text-muted-foreground">Go beyond a single payback figure. Compare production, test assumptions and keep a reproducible record of every quote.</p></div><div className="grid gap-6 sm:grid-cols-2">{[
       { i: Database, t: "Verifiable sunlight", d: "Monthly yield from PVGIS satellite records, with source period, roof assumptions and retrieval date." },

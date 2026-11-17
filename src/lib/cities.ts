@@ -61,4 +61,4 @@ export const getCity = (slug: string) => CITIES.find((c) => c.slug === slug);
 export const getCountry = (slug: string) => COUNTRY_GUIDES.find((c) => c.slug === slug);
 export const citiesForCountry = (slug: string) => CITIES.filter((c) => c.countrySlug === slug);
 export const currencyForCountry = (country: string): Currency => country === "United Kingdom" ? "GBP" : country === "Poland" ? "PLN" : "EUR";
-export const SITE_URL = "https://solar-payback-93s.pages.dev";
+export { SITE_URL } from "./site";

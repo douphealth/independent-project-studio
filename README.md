@@ -36,7 +36,7 @@ Create a production build with `bun run build`.
 
 The app needs no application secrets. Deploy the production build to a Cloudflare-compatible TanStack Start host. Server functions must remain enabled: they proxy and cache PVGIS and Open-Meteo requests and avoid exposing a browser directly to upstream failures.
 
-Before deploying to another domain, update the canonical site URL in `src/lib/site.ts`, the sitemap URL in `public/robots.txt`, and the homepage social-image URL in `src/routes/index.tsx`. Verify `sitemap.xml`, robots directives, share links, and live PVGIS responses on the deployed host.
+The public origin is the hardcoded constant `SITE_URL` in `src/lib/site.ts` (`https://solarpayback.shop`). Sitemap URLs, canonicals, Open Graph URLs, JSON-LD, `robots.txt`, and `llms.txt` all use that constant. Do not derive it from the request host or a `pages.dev` environment variable. The IndexNow key file is `public/b9172d99fb6df935a7819375eaeac9b9.txt`. Verify `sitemap.xml`, robots directives, share links, and live PVGIS responses on the deployed host.
 
 PVGIS and Open-Meteo are the only external runtime data providers. Profiles are cached in memory for 24 hours with stale fallback; this is best-effort and not a persistent distributed cache.
 

@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Menu } from "lucide-react";
-import brandIcon from "@/assets/solarpayback-brand-icon.png";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +16,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const linkCls = overlay ? "text-night-foreground/80 hover:text-night-foreground" : "text-muted-foreground hover:text-foreground";
   return <header className={`${overlay ? "absolute inset-x-0 top-0 z-20" : "sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur"}`}>
     <div className={`mx-auto flex h-16 max-w-6xl items-center justify-between px-5 ${base}`}>
-      <Link to="/" className="flex items-center gap-2 font-display text-xl font-semibold" aria-label="SolarPayback home"><img src={brandIcon} alt="" width={32} height={32} loading="eager" className="h-8 w-8 object-contain" />SolarPayback</Link>
+      <Link to="/" className="flex items-center gap-2 font-display text-xl font-semibold" aria-label="SolarPayback home"><img src="/favicon.png" alt="" width={32} height={32} loading="eager" className="h-8 w-8 object-contain" />SolarPayback</Link>
       <nav className="hidden items-center gap-6 text-sm font-medium lg:flex" aria-label="Main navigation">{NAV.map((item) => <Link key={item.to} to={item.to} className={linkCls} activeProps={{ className: "!text-primary" }}>{item.label}</Link>)}</nav>
       <div className="lg:hidden"><Sheet><SheetTrigger asChild><Button variant="ghost" size="icon" className={`${overlay ? "text-night-foreground hover:bg-night-foreground/10 hover:text-night-foreground" : ""} h-11 w-11`} aria-label="Open navigation"><Menu /></Button></SheetTrigger><SheetContent side="right" className="w-[86vw] max-w-sm"><SheetHeader><SheetTitle className="font-display text-2xl">Explore SolarPayback</SheetTitle><SheetDescription>Independent estimates. No account or sales calls.</SheetDescription></SheetHeader><nav className="mt-8 grid gap-2" aria-label="Mobile navigation">{NAV.map((item) => <SheetClose asChild key={item.to}><Link to={item.to} className="rounded-xl px-4 py-3 font-medium hover:bg-muted" activeProps={{ className: "bg-accent text-accent-foreground" }}>{item.label}</Link></SheetClose>)}</nav><div className="mt-8 border-t border-border pt-6"><SheetClose asChild><Link to="/about" className="block rounded-xl px-4 py-3 text-sm hover:bg-muted">About & independence</Link></SheetClose><SheetClose asChild><Link to="/contact" className="block rounded-xl px-4 py-3 text-sm hover:bg-muted">Contact & corrections</Link></SheetClose></div></SheetContent></Sheet></div>
     </div>
