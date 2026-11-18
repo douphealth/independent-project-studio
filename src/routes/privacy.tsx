@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ContentPage } from "@/components/ContentPage";
 import { SITE_URL } from "@/lib/cities";
+import { MonetizePrivacy } from "@/components/MonetizePrivacy";
 
 const T = "Privacy — local solar scenarios & external data | SolarPayback";
 const D = "Understand what SolarPayback stores in your browser, what share links contain, and which location data is sent to PVGIS and Open-Meteo.";
@@ -13,5 +14,6 @@ export const Route = createFileRoute("/privacy")({
     <section><h2>Location requests</h2><p>Your location search is sent through our server to <strong>Open-Meteo's geocoding API</strong>. Coordinates and roof parameters are sent through our server to the <strong>EU JRC PVGIS API</strong> to obtain production estimates. Those providers can observe the request and network metadata under their own policies.</p><p><a href="https://open-meteo.com/en/terms" target="_blank" rel="noreferrer">Open-Meteo terms</a> · <a href="https://commission.europa.eu/legal-notice_en" target="_blank" rel="noreferrer">European Commission legal notice</a></p></section>
     <section><h2>Exports and external resources</h2><p>CSV and PDF generation happens on your device. Fonts are served with the site rather than requested from a third-party font service. Official policy links and the source repository are external sites; their own privacy terms apply when you choose to open them.</p></section>
     <section><h2>Measurement and changes</h2><p>This version does not include an analytics or conversion-tracking service. If privacy-respecting aggregate measurement is added later, this notice should be updated before deployment. For privacy questions or corrections, use the <Link to="/contact">contact and corrections page</Link>.</p></section>
+    <MonetizePrivacy />
   </ContentPage>,
 });

@@ -9,3 +9,6 @@ export const OFFER_SLOTS: Record<OfferSlotId, OfferSlot> = {
 };
 
 export const OFFER_LINKS: Record<string, string> = {};
+
+// Amazon Associates tracking ID for this site (empty = no Amazon links).
+export const AMAZON = { tag: "", domain: "www.amazon.com" };
